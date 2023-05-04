@@ -1,0 +1,11 @@
+body {
+  padding: 0 5%;
+}
+
+.gooey-output-text {
+  overflow-y: scroll;
+}
+
+.gooey-output-text p {
+  white-space: pre-wrap;
+}
