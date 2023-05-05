@@ -1,13 +1,15 @@
-import { cssBundleHref } from "@remix-run/css-bundle";
-import { LinksFunction, MetaFunction } from "@remix-run/node"; // Depends on the runtime you choose
 import {
+  isRouteErrorResponse,
   Links,
   LiveReload,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "@remix-run/react";
+import type { LinksFunction } from "@remix-run/node"; // Depends on the runtime you choose
+import { cssBundleHref } from "@remix-run/css-bundle";
 import React from "react";
 
 import styles from "./root.css";
@@ -41,5 +43,34 @@ export default function App() {
         {/*<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>*/}
       </body>
     </html>
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  // when true, this is what used to go to `CatchBoundary`
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div>
+        <p>Status: {error.status}</p>
+        <p dangerouslySetInnerHTML={{ __html: error.data }}></p>
+      </div>
+    );
+  }
+
+  // Don't forget to typecheck with your own logic.
+  // Any value can be thrown, not just errors!
+  let errorMessage = "Unknown error";
+  // if (isDefinitelyAnError(error)) {
+  //   errorMessage = error.message;
+  // }
+
+  return (
+    <div>
+      <h1>Uh oh ...</h1>
+      <p>Something went wrong.</p>
+      <pre>{errorMessage}</pre>
+    </div>
   );
 }

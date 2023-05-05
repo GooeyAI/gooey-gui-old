@@ -23,8 +23,7 @@ import Select from "react-select";
 export async function runLoader({ url }: { url: string }) {
   let response = await fetch(url);
   if (!response.ok) {
-    throw json(await response.text(), { status: response.status });
-    // return new Response("Failed to load: " + (await response.text()));
+    throw response;
   }
   return await response.json();
 }
