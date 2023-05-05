@@ -1,10 +1,11 @@
 import styles from "../routes/styles.module.css";
-import React from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { JsonViewer } from "@textea/json-viewer";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { marked } from "marked";
 import { json } from "@remix-run/node";
+import Select from "react-select";
 
 // export const meta: V2_MetaFunction = () => {
 //   return [{ title: "New Remix App" }];
@@ -21,10 +22,10 @@ import { json } from "@remix-run/node";
 
 export async function runLoader({ url }: { url: string }) {
   let response = await fetch(url);
-  // if (!response.ok) {
-  //   throw json(await response.text(), { status: response.status });
-  //   // return new Response("Failed to load: " + (await response.text()));
-  // }
+  if (!response.ok) {
+    throw json(await response.text(), { status: response.status });
+    // return new Response("Failed to load: " + (await response.text()));
+  }
   return await response.json();
 }
 
@@ -66,13 +67,21 @@ function RenderTreeNode(elem: TreeNode): any {
       );
     case "details":
       return (
-        <details open={elem.props.open}>
-          <summary>
-            <RenderedMarkdown body={elem.props.label} />
-          </summary>
+        <Details
+          open={elem.props.open}
+          summary={<RenderedMarkdown body={elem.props.label} />}
+        >
           {renderChildren(elem.children)}
-        </details>
+        </Details>
       );
+    // return (
+    //   <details open={true}>
+    //     <summary>
+    //       <RenderedMarkdown body={elem.props.label} />
+    //     </summary>
+    //     {renderChildren(elem.children)}
+    //   </details>
+    // );
     case "columns":
       return (
         <div style={elem.style} className={styles.columns}>
@@ -173,6 +182,23 @@ function RenderTreeNode(elem: TreeNode): any {
           <select style={elem.style}>{renderChildren(elem.children)}</select>
         </>
       );
+    case "multiselect":
+      return (
+        <>
+          <label>
+            <RenderedMarkdown body={elem.props.label} />
+          </label>
+          <Select
+            defaultValue={elem.props.defaultValue}
+            isMulti
+            isDisabled={elem.props.disabled}
+            name={elem.props.name}
+            options={elem.props.options}
+            className="basic-multi-select"
+            classNamePrefix="select"
+          />
+        </>
+      );
     case "option":
       return (
         <option
@@ -191,7 +217,8 @@ function RenderTreeNode(elem: TreeNode): any {
             marginTop: "1rem",
           }}
           value={elem.props.value}
-          collapseStringsAfterLength={elem.props.collapseStringsAfterLength}
+          defaultInspectDepth={elem.props.defaultInspectDepth}
+          rootName={false}
         ></JsonViewer>
       );
     case "table":
@@ -215,6 +242,52 @@ function RenderTreeNode(elem: TreeNode): any {
         </div>
       );
   }
+}
+
+function Details({
+  open,
+  summary,
+  children,
+}: {
+  open?: boolean;
+  summary: JSX.Element;
+  children: ReactNode;
+}) {
+  const [isOpen, setIsOpen] = useState(open);
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    if (ref.current.checked != isOpen) {
+      setIsOpen(ref.current.checked);
+    }
+  }, [isOpen]);
+
+  return (
+    <div style={{ border: "1px solid gray" }}>
+      <input hidden={true} type="checkbox" ref={ref} name={"magic"} />
+      <div
+        onClick={() => {
+          ref.current!.checked = !isOpen;
+          setIsOpen(!isOpen);
+        }}
+        style={{
+          userSelect: "none",
+          backgroundColor: "lightgrey",
+        }}
+      >
+        {isOpen ? "▼" : "▶"}
+        {summary}
+      </div>
+      <div
+        style={{
+          display: isOpen ? "block" : "none",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function RenderedMarkdown({
