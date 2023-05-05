@@ -59,18 +59,11 @@ export function ErrorBoundary() {
     );
   }
 
-  // Don't forget to typecheck with your own logic.
-  // Any value can be thrown, not just errors!
-  let errorMessage = "Unknown error";
-  // if (isDefinitelyAnError(error)) {
-  //   errorMessage = error.message;
-  // }
-
   return (
     <div>
       <h1>Uh oh ...</h1>
       <p>Something went wrong.</p>
-      <pre>{errorMessage}</pre>
+      <pre>Code: {typeof error}</pre>
     </div>
   );
 }

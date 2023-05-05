@@ -1,14 +1,13 @@
 import { useLoaderData } from "@remix-run/react";
-import { renderChildren, runLoader } from "~/base/base";
-import process from "process";
+import { RenderedChildren, runLoader } from "~/base/base";
 
 export async function loader() {
   return runLoader({
-    url: process.env["SERVER_HOST"] + "/explore/",
+    path: "/explore/",
   });
 }
 
 export default function Index() {
   const children = useLoaderData();
-  return renderChildren(children);
+  return <RenderedChildren children={children} />;
 }

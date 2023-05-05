@@ -4,8 +4,9 @@ import { JsonViewer } from "@textea/json-viewer";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { marked } from "marked";
-import { json } from "@remix-run/node";
 import Select from "react-select";
+import { redirect } from "@remix-run/node";
+import process from "process";
 
 // export const meta: V2_MetaFunction = () => {
 //   return [{ title: "New Remix App" }];
@@ -20,8 +21,16 @@ import Select from "react-select";
 //   ];
 // };
 
-export async function runLoader({ url }: { url: string }) {
-  let response = await fetch(url);
+export async function runLoader({ path }: { path: string }) {
+  const pathlib = require("path");
+  // concat base url and path
+  const url = pathlib.join(process.env["SERVER_HOST"], path);
+  const response = await fetch(url, { redirect: "manual" });
+  // follow redirects back to the client
+  if (response.status == 307) {
+    const url = new URL(response.headers.get("location") ?? "");
+    return redirect(url.pathname + url.search + url.hash);
+  }
   if (!response.ok) {
     throw response;
   }
@@ -35,70 +44,71 @@ type TreeNode = {
   style: Record<string, string>;
 };
 
-export function renderChildren(tree: Array<TreeNode>) {
-  return <>{...tree.map(RenderTreeNode)}</>;
+export function RenderedChildren({ children }: { children: Array<TreeNode> }) {
+  let elements = children.map((node, idx) => (
+    <RenderedTreeNode key={idx} node={node} />
+  ));
+  return <>{elements}</>;
 }
 
-function RenderTreeNode(elem: TreeNode): any {
-  switch (elem.name) {
+function RenderedTreeNode({ node }: { node: TreeNode }): any {
+  const { name, props, children, style } = node;
+  switch (name) {
     case "":
-      return renderChildren(elem.children);
+      return <RenderedChildren children={children} />;
     case "pre":
-      return <pre style={elem.style}>{elem.props.body}</pre>;
+      return <pre style={style}>{props.body}</pre>;
     case "div":
-      return <div style={elem.style}>{renderChildren(elem.children)}</div>;
-    case "tabs":
       return (
-        <Tabs style={elem.style}>
-          <TabList>
-            {...elem.children.map((elem) => (
-              <Tab>
-                <RenderedMarkdown body={elem.props.label} />
-              </Tab>
-            ))}
-          </TabList>
-          {renderChildren(elem.children)}
+        <div style={style}>
+          <RenderedChildren children={children} />
+        </div>
+      );
+    case "tabs":
+      let tabs = children.map((elem) => (
+        <Tab key={elem.props.label}>
+          <RenderedMarkdown body={elem.props.label} />
+        </Tab>
+      ));
+      return (
+        <Tabs style={style}>
+          <TabList>{tabs}</TabList>
+          <RenderedChildren children={children} />
         </Tabs>
       );
     case "tab":
       return (
-        <TabPanel style={elem.style}>{renderChildren(elem.children)}</TabPanel>
+        <TabPanel style={style}>
+          <RenderedChildren children={children} />
+        </TabPanel>
       );
     case "details":
       return (
         <Details
-          open={elem.props.open}
-          summary={<RenderedMarkdown body={elem.props.label} />}
+          open={props.open}
+          summary={<RenderedMarkdown body={props.label} />}
         >
-          {renderChildren(elem.children)}
+          <RenderedChildren children={children} />
         </Details>
       );
-    // return (
-    //   <details open={true}>
-    //     <summary>
-    //       <RenderedMarkdown body={elem.props.label} />
-    //     </summary>
-    //     {renderChildren(elem.children)}
-    //   </details>
-    // );
     case "columns":
       return (
-        <div style={elem.style} className={styles.columns}>
-          {renderChildren(elem.children)}
+        <div style={style} className={styles.columns}>
+          <RenderedChildren children={children} />
         </div>
       );
     case "img":
       return (
         <>
-          <RenderedMarkdown body={elem.props.caption} />
+          <RenderedMarkdown body={props.caption} />
           <img
             className={styles.img}
-            style={elem.style}
-            src={elem.props.src}
-            alt={elem.props.caption}
+            style={style}
+            src={props.src}
+            alt={props.caption}
             onClick={() => {
-              if (elem.props.src.startsWith("data:")) return;
-              window.open(elem.props.src);
+              if (props.src.startsWith("data:")) return;
+              window.open(props.src);
             }}
           />
         </>
@@ -106,53 +116,53 @@ function RenderTreeNode(elem: TreeNode): any {
     case "video":
       return (
         <>
-          <RenderedMarkdown body={elem.props.caption} />
+          <RenderedMarkdown body={props.caption} />
           <video
-            style={elem.style}
+            style={style}
             className={styles.video}
             controls
-            src={elem.props.src}
+            src={props.src}
           ></video>
         </>
       );
     case "audio":
       return (
         <>
-          <RenderedMarkdown body={elem.props.caption} />
+          <RenderedMarkdown body={props.caption} />
           <audio
-            style={elem.style}
+            style={style}
             className={styles.audio}
             controls
-            src={elem.props.src}
+            src={props.src}
           ></audio>
         </>
       );
     case "html":
       return (
         <div
-          style={elem.style}
+          style={style}
           dangerouslySetInnerHTML={{
-            __html: elem.props.body,
+            __html: props.body,
           }}
         ></div>
       );
     case "markdown":
       return (
         <RenderedMarkdown
-          body={elem.props.body}
-          allowUnsafeHTML={elem.props.unsafe_allow_html || false}
+          body={props.body}
+          allowUnsafeHTML={props.unsafe_allow_html || false}
         />
       );
     case "textarea":
       return (
         <div>
-          <RenderedMarkdown body={elem.props.label} />
+          <RenderedMarkdown body={props.label} />
           <div>
             <textarea
               className={styles.textArea}
-              style={elem.style}
-              defaultValue={elem.props.value}
-              disabled={elem.props.disabled}
+              style={style}
+              defaultValue={props.value}
+              disabled={props.disabled}
             />
           </div>
         </div>
@@ -161,38 +171,40 @@ function RenderTreeNode(elem: TreeNode): any {
       return (
         <div>
           <label>
-            <RenderedMarkdown body={elem.props.label} />
+            <RenderedMarkdown body={props.label} />
           </label>
-          <input {...elem.props} />
+          <input {...props} />
         </div>
       );
     case "button":
       return (
-        <button disabled={elem.props.disabled} type={elem.props.type}>
-          <RenderedMarkdown body={elem.props.label} />
+        <button disabled={props.disabled} type={props.type}>
+          <RenderedMarkdown body={props.label} />
         </button>
       );
     case "select":
       return (
         <>
           <label>
-            <RenderedMarkdown body={elem.props.label} />
+            <RenderedMarkdown body={props.label} />
           </label>
-          <select style={elem.style}>{renderChildren(elem.children)}</select>
+          <select style={style}>
+            <RenderedChildren children={children} />
+          </select>
         </>
       );
     case "multiselect":
       return (
         <>
           <label>
-            <RenderedMarkdown body={elem.props.label} />
+            <RenderedMarkdown body={props.label} />
           </label>
           <Select
-            defaultValue={elem.props.defaultValue}
+            defaultValue={props.defaultValue}
             isMulti
-            isDisabled={elem.props.disabled}
-            name={elem.props.name}
-            options={elem.props.options}
+            isDisabled={props.disabled}
+            name={props.name}
+            options={props.options}
             className="basic-multi-select"
             classNamePrefix="select"
           />
@@ -201,11 +213,11 @@ function RenderTreeNode(elem: TreeNode): any {
     case "option":
       return (
         <option
-          style={elem.style}
-          defaultValue={elem.props.value}
-          selected={elem.props.selected}
+          style={style}
+          defaultValue={props.value}
+          selected={props.selected}
         >
-          <RenderedMarkdown body={elem.props.label} />
+          <RenderedMarkdown body={props.label} />
         </option>
       );
     case "json":
@@ -215,28 +227,52 @@ function RenderTreeNode(elem: TreeNode): any {
             overflow: "scroll",
             marginTop: "1rem",
           }}
-          value={elem.props.value}
-          defaultInspectDepth={elem.props.defaultInspectDepth}
+          value={props.value}
+          defaultInspectDepth={props.defaultInspectDepth}
           rootName={false}
         ></JsonViewer>
       );
     case "table":
-      return <table>{renderChildren(elem.children)}</table>;
+      return (
+        <table>
+          <RenderedChildren children={children} />
+        </table>
+      );
     case "thead":
-      return <thead>{renderChildren(elem.children)}</thead>;
+      return (
+        <thead>
+          <RenderedChildren children={children} />
+        </thead>
+      );
     case "tbody":
-      return <tbody>{renderChildren(elem.children)}</tbody>;
+      return (
+        <tbody>
+          <RenderedChildren children={children} />
+        </tbody>
+      );
     case "tr":
-      return <tr>{renderChildren(elem.children)}</tr>;
+      return (
+        <tr>
+          <RenderedChildren children={children} />
+        </tr>
+      );
     case "th":
-      return <th>{renderChildren(elem.children)}</th>;
+      return (
+        <th>
+          <RenderedChildren children={children} />
+        </th>
+      );
     case "td":
-      return <td>{renderChildren(elem.children)}</td>;
+      return (
+        <td>
+          <RenderedChildren children={children} />
+        </td>
+      );
     default:
       return (
         <div className={styles.md}>
           <pre>
-            <code>{JSON.stringify(elem)}</code>
+            <code>{JSON.stringify(node)}</code>
           </pre>
         </div>
       );
