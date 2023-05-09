@@ -74,3 +74,12 @@
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+.stickyLoader {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 25px;
+  height: 25px;
+  color: rebeccapurple;
+}

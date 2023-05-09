@@ -1,48 +1,38 @@
-import styles from "../routes/styles.module.css";
+import styles from "~/styles/styles.module.css";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { JsonViewer } from "@textea/json-viewer";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { marked } from "marked";
 import Select from "react-select";
-import { redirect } from "@remix-run/node";
-import process from "process";
-
-// export const meta: V2_MetaFunction = () => {
-//   return [{ title: "New Remix App" }];
-// };
-
-// export const links: LinksFunction = () => {
-//   return [
-//     {
-//       rel: "stylesheet",
-//       href: "https://unpkg.com/modern-css-reset@1.4.0/dist/reset.min.css",
-//     },
-//   ];
-// };
-
-export async function runLoader({ path }: { path: string }) {
-  const pathlib = require("path");
-  // concat base url and path
-  const url = pathlib.join(process.env["SERVER_HOST"], path);
-  const response = await fetch(url, { redirect: "manual" });
-  // follow redirects back to the client
-  if (response.status == 307) {
-    const url = new URL(response.headers.get("location") ?? "");
-    return redirect(url.pathname + url.search + url.hash);
-  }
-  if (!response.ok) {
-    throw response;
-  }
-  return await response.json();
-}
 
 type TreeNode = {
   name: string;
   props: Record<string, any>;
-  children: any[];
+  children: Array<TreeNode>;
   style: Record<string, string>;
 };
+
+export function getTransforms({
+  children,
+}: {
+  children: Array<TreeNode>;
+}): Record<string, string> {
+  let ret: Record<string, string> = {};
+  for (const node of children) {
+    const { name, props, children } = node;
+    switch (name) {
+      case "input":
+        switch (props.type) {
+          case "checkbox":
+            ret[props.name] = "checkbox";
+        }
+    }
+    if (!children) continue;
+    ret = { ...ret, ...getTransforms({ children }) };
+  }
+  return ret;
+}
 
 export function RenderedChildren({ children }: { children: Array<TreeNode> }) {
   let elements = children.map((node, idx) => (
@@ -52,7 +42,7 @@ export function RenderedChildren({ children }: { children: Array<TreeNode> }) {
 }
 
 function RenderedTreeNode({ node }: { node: TreeNode }): any {
-  const { name, props, children, style } = node;
+  let { name, props, children, style } = node;
   switch (name) {
     case "":
       return <RenderedChildren children={children} />;
@@ -70,17 +60,16 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
           <RenderedMarkdown body={elem.props.label} />
         </Tab>
       ));
+      let panels = children.map((elem) => (
+        <TabPanel key={elem.props.label} style={elem.style}>
+          <RenderedChildren children={elem.children} />
+        </TabPanel>
+      ));
       return (
         <Tabs style={style}>
           <TabList>{tabs}</TabList>
-          <RenderedChildren children={children} />
+          {panels}
         </Tabs>
-      );
-    case "tab":
-      return (
-        <TabPanel style={style}>
-          <RenderedChildren children={children} />
-        </TabPanel>
       );
     case "details":
       return (
@@ -168,6 +157,11 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
         </div>
       );
     case "input":
+      if (["checkbox"].includes(props.type)) {
+        props.defaultChecked = props.defaultValue ? "checked" : undefined;
+        props = { ...props };
+        delete props.defaultValue;
+      }
       return (
         <div>
           <label>
@@ -233,41 +227,17 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
         ></JsonViewer>
       );
     case "table":
-      return (
-        <table>
-          <RenderedChildren children={children} />
-        </table>
-      );
+      return <table>{<RenderedChildren children={children} />}</table>;
     case "thead":
-      return (
-        <thead>
-          <RenderedChildren children={children} />
-        </thead>
-      );
+      return <thead>{<RenderedChildren children={children} />}</thead>;
     case "tbody":
-      return (
-        <tbody>
-          <RenderedChildren children={children} />
-        </tbody>
-      );
+      return <tbody>{<RenderedChildren children={children} />}</tbody>;
     case "tr":
-      return (
-        <tr>
-          <RenderedChildren children={children} />
-        </tr>
-      );
+      return <tr>{<RenderedChildren children={children} />}</tr>;
     case "th":
-      return (
-        <th>
-          <RenderedChildren children={children} />
-        </th>
-      );
+      return <th>{<RenderedChildren children={children} />}</th>;
     case "td":
-      return (
-        <td>
-          <RenderedChildren children={children} />
-        </td>
-      );
+      return <td>{<RenderedChildren children={children} />}</td>;
     default:
       return (
         <div className={styles.md}>
