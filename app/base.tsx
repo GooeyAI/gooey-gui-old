@@ -23,10 +23,11 @@ export function getTransforms({
     const { name, props, children } = node;
     switch (name) {
       case "input":
-        switch (props.type) {
-          case "checkbox":
-            ret[props.name] = "checkbox";
-        }
+        ret[props.name] = props.type;
+        break;
+      default:
+        ret[props.name] = name;
+        break;
     }
     if (!children) continue;
     ret = { ...ret, ...getTransforms({ children }) };
@@ -147,21 +148,11 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
         <div>
           <RenderedMarkdown body={props.label} />
           <div>
-            <textarea
-              className={styles.textArea}
-              style={style}
-              defaultValue={props.value}
-              disabled={props.disabled}
-            />
+            <textarea className={styles.textArea} style={style} {...props} />
           </div>
         </div>
       );
     case "input":
-      if (["checkbox"].includes(props.type)) {
-        props.defaultChecked = props.defaultValue ? "checked" : undefined;
-        props = { ...props };
-        delete props.defaultValue;
-      }
       return (
         <div>
           <label>

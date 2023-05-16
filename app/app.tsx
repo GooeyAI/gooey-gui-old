@@ -1,17 +1,12 @@
-import {
-  ShouldRevalidateFunction,
-  useFetcher,
-  useLoaderData,
-  useParams,
-} from "@remix-run/react";
-import { getTransforms, RenderedChildren } from "~/base";
-import type { ActionArgs, LoaderArgs } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
-import React, { FormEvent } from "react";
+import type {ShouldRevalidateFunction} from "@remix-run/react";
+import {useFetcher, useLoaderData, useParams} from "@remix-run/react";
+import {getTransforms, RenderedChildren} from "~/base";
+import type {ActionArgs, LoaderArgs} from "@remix-run/node";
+import {redirect} from "@remix-run/node";
+import type {FormEvent} from "react";
+import React from "react";
 import process from "process";
-import is from "@sindresorhus/is";
-import formData = is.formData;
-// import { ActionArgs } from "@remix-run/node";
+import {useDebouncedCallback} from "use-debounce";
 
 // export const meta: V2_MetaFunction = () => {
 //   return [{ title: "New Remix App" }];
@@ -30,12 +25,24 @@ export async function loader({ params, request }: LoaderArgs) {
   return await _loader({ state: {}, params, request });
 }
 
-const dataTransformFns: Record<string, (val: FormDataEntryValue) => any> = {
+const formDataToJson: Record<string, (val: FormDataEntryValue) => any> = {
   checkbox: Boolean,
+  number: parseNum,
+  range: parseNum,
 };
 
+function parseNum(val: FormDataEntryValue): number {
+  let strVal = val.toString();
+  const floatVal = parseFloat(strVal);
+  const intVal = parseInt(strVal);
+  if (floatVal == intVal) {
+    return intVal;
+  } else {
+    return floatVal;
+  }
+}
+
 export async function action({ params, request }: ActionArgs) {
-  let start = performance.now();
   const { __gooey_state, __gooey_transforms, ...formData } = Object.fromEntries(
     await request.formData()
   );
@@ -43,7 +50,8 @@ export async function action({ params, request }: ActionArgs) {
     __gooey_transforms.toString()
   );
   for (let [k, v] of Object.entries(transforms)) {
-    let fn = dataTransformFns[v];
+    let fn = formDataToJson[v];
+    if (!fn) continue;
     formData[k] = fn(formData[k]);
   }
   console.log(formData);
@@ -52,7 +60,6 @@ export async function action({ params, request }: ActionArgs) {
     ...formData,
   };
   let ret = await _loader({ state, params, request });
-  console.log("total took", performance.now() - start, "ms");
   return ret;
 }
 
@@ -106,9 +113,24 @@ export default function App() {
   const loaderData = useLoaderData<typeof loader>();
   const data = fetcher.data ?? loaderData;
 
-  function handleChange(event: FormEvent<HTMLFormElement>) {
-    fetcher.submit(event.currentTarget);
-  }
+  const submitFormFast = useDebouncedCallback((form: HTMLFormElement) => {
+    fetcher.submit(form);
+  }, 250);
+  const submitFormSlow = useDebouncedCallback((form: HTMLFormElement) => {
+    fetcher.submit(form);
+  }, 1000);
+
+  const handleChange = (event: FormEvent<HTMLFormElement>) => {
+    let target = event.target;
+    // ignore hidden inputs
+    if (target instanceof HTMLInputElement && target.type === "hidden") return;
+    // debounce based on input type - generally text inputs are slow, everything else is fast
+    if (target instanceof HTMLElement && target.hasAttribute("slowdebounce")) {
+      submitFormSlow(event.currentTarget);
+    } else {
+      submitFormFast(event.currentTarget);
+    }
+  };
 
   return (
     <>
