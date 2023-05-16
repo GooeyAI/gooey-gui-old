@@ -7,6 +7,7 @@ import type {FormEvent} from "react";
 import React from "react";
 import process from "process";
 import {useDebouncedCallback} from "use-debounce";
+import {JsonViewer} from "@textea/json-viewer";
 
 // export const meta: V2_MetaFunction = () => {
 //   return [{ title: "New Remix App" }];
@@ -134,6 +135,16 @@ export default function App() {
 
   return (
     <>
+      {/*<JsonViewer*/}
+      {/*  style={{*/}
+      {/*    overflow: "scroll",*/}
+      {/*    marginTop: "1rem",*/}
+      {/*    maxHeight: "50vh",*/}
+      {/*  }}*/}
+      {/*  value={data}*/}
+      {/*  defaultInspectDepth={50}*/}
+      {/*  rootName={false}*/}
+      {/*></JsonViewer>*/}
       <fetcher.Form
         action={"/" + params["*"]}
         method="POST"

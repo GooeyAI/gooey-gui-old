@@ -81,12 +81,6 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
           <RenderedChildren children={children} />
         </Details>
       );
-    case "columns":
-      return (
-        <div style={style} className={styles.columns}>
-          <RenderedChildren children={children} />
-        </div>
-      );
     case "img":
       return (
         <>
