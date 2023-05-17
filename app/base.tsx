@@ -167,7 +167,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
           <label>
             <RenderedMarkdown body={props.label} />
           </label>
-          <select style={style}>
+          <select style={style} {...props}>
             <RenderedChildren children={children} />
           </select>
         </>
@@ -191,11 +191,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
       );
     case "option":
       return (
-        <option
-          style={style}
-          defaultValue={props.value}
-          selected={props.selected}
-        >
+        <option style={style} {...props}>
           <RenderedMarkdown body={props.label} />
         </option>
       );
