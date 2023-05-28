@@ -4,7 +4,7 @@ import { eventStream } from "remix-utils";
 import { createClient } from "redis";
 
 const client = createClient({
-  url: "redis://localhost:6379",
+  url: process.env["REDIS_URL"],
 });
 
 export async function loader({ params, request }: LoaderArgs) {
