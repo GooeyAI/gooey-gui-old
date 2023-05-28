@@ -1,17 +1,22 @@
-import type {ShouldRevalidateFunction} from "@remix-run/react";
-import {useFetcher, useLoaderData, useParams} from "@remix-run/react";
-import {getTransforms, RenderedChildren} from "~/base";
-import type {ActionArgs, LoaderArgs} from "@remix-run/node";
-import {redirect} from "@remix-run/node";
-import type {FormEvent} from "react";
-import React from "react";
+import type {
+  FetcherWithComponents,
+  ShouldRevalidateFunction,
+  V2_MetaFunction,
+} from "@remix-run/react";
+import { useFetcher, useLoaderData, useSearchParams } from "@remix-run/react";
+import { getTransforms, RenderedChildren } from "~/base";
+import type { ActionArgs, LoaderArgs } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+import type { FormEvent } from "react";
+import React, { useEffect, useRef } from "react";
 import process from "process";
-import {useDebouncedCallback} from "use-debounce";
-import {JsonViewer} from "@textea/json-viewer";
+import { useDebouncedCallback } from "use-debounce";
+import { useEventSource } from "remix-utils";
+import path from "path";
 
-// export const meta: V2_MetaFunction = () => {
-//   return [{ title: "New Remix App" }];
-// };
+export const meta: V2_MetaFunction = ({ data }) => {
+  return data.meta ?? [];
+};
 
 // export const links: LinksFunction = () => {
 //   return [
@@ -23,19 +28,96 @@ import {JsonViewer} from "@textea/json-viewer";
 // };
 
 export async function loader({ params, request }: LoaderArgs) {
-  return await _loader({ state: {}, params, request });
+  return await _loader({ body: {}, params, request });
 }
 
-const formDataToJson: Record<string, (val: FormDataEntryValue) => any> = {
+export async function action({ params, request }: ActionArgs) {
+  // parse form data
+  const { __gooey_gui_request_body, ...inputs } = Object.fromEntries(
+    await request.formData()
+  );
+  // parse request body
+  const {
+    transforms,
+    state,
+    ...body
+  }: {
+    transforms: Record<string, string>;
+    state: Record<string, any>;
+  } & Record<string, any> = JSON.parse(__gooey_gui_request_body.toString());
+  // apply transforms
+  for (let [field, inputType] of Object.entries(transforms)) {
+    let toJson = formFieldToJson[inputType];
+    if (!toJson) continue;
+    inputs[field] = toJson(inputs[field]);
+  }
+  // update state with new form data
+  body.state = { ...state, ...inputs };
+  return await _loader({ body, params, request });
+}
+
+async function _loader({
+  body,
+  params,
+  request,
+}: {
+  body: Record<string, any>;
+  params: Record<string, any>;
+  request: Request;
+}) {
+  const requestUrl = new URL(request.url);
+  const serverUrl = new URL(process.env["SERVER_HOST"]!);
+  const baseUrl = path.join(serverUrl.pathname);
+  serverUrl.pathname = path.join(baseUrl, params["*"] ?? "");
+  serverUrl.search = requestUrl.search;
+
+  request.headers.set("Content-Type", "application/json");
+  const response = await fetch(serverUrl, {
+    method: "POST",
+    redirect: "manual",
+    body: JSON.stringify(body),
+    headers: request.headers,
+  });
+
+  // follow redirects back to the client
+  if (response.status == 307) {
+    // get the redirect url
+    const redirectUrl = new URL(response.headers.get("location") ?? "/");
+    // ensure that the redirect is to the same host as the request
+    if (redirectUrl.host == serverUrl.host) {
+      redirectUrl.host = request.headers.get("host") ?? "";
+    }
+    // ensure that the redirect is to the same base path as the request
+    if (redirectUrl.pathname.startsWith(baseUrl)) {
+      redirectUrl.pathname = redirectUrl.pathname.replace(baseUrl, "/");
+    }
+    return redirect(redirectUrl.toString(), {
+      status: response.status,
+      headers: response.headers,
+    });
+  } else if (!response.ok) {
+    throw response;
+  }
+
+  let responseJson = await response.json();
+
+  return json(responseJson, {
+    status: response.status,
+    headers: response.headers,
+  });
+}
+
+const formFieldToJson: Record<string, (val: FormDataEntryValue) => any> = {
   checkbox: Boolean,
-  number: parseNum,
-  range: parseNum,
+  number: parseIntFloat,
+  range: parseIntFloat,
+  select: (val) => JSON.parse(val.toString()),
 };
 
-function parseNum(val: FormDataEntryValue): number {
+function parseIntFloat(val: FormDataEntryValue): number {
   let strVal = val.toString();
-  const floatVal = parseFloat(strVal);
   const intVal = parseInt(strVal);
+  const floatVal = parseFloat(strVal);
   if (floatVal == intVal) {
     return intVal;
   } else {
@@ -43,83 +125,80 @@ function parseNum(val: FormDataEntryValue): number {
   }
 }
 
-export async function action({ params, request }: ActionArgs) {
-  const { __gooey_state, __gooey_transforms, ...formData } = Object.fromEntries(
-    await request.formData()
-  );
-  const transforms: Record<string, string> = JSON.parse(
-    __gooey_transforms.toString()
-  );
-  for (let [k, v] of Object.entries(transforms)) {
-    let fn = formDataToJson[v];
-    if (!fn) continue;
-    formData[k] = fn(formData[k]);
-  }
-  console.log(formData);
-  const state = {
-    ...JSON.parse(__gooey_state.toString()),
-    ...formData,
-  };
-  let ret = await _loader({ state, params, request });
-  return ret;
-}
-
-async function _loader({
-  state,
-  params,
-  request,
-}: {
-  state: Record<string, any>;
-  params: Record<string, any>;
-  request: Request;
-}) {
-  const pathlib = require("path");
-
-  const url = new URL(request.url);
-  const filePath = params["*"];
-  const path =
-    "/__/gooey-ui/" + Array.of(filePath).join("/") + url.search + url.hash;
-
-  // concat base url and path
-  const response = await fetch(pathlib.join(process.env["SERVER_HOST"], path), {
-    method: "POST",
-    redirect: "follow",
-    body: JSON.stringify({ state }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  // follow redirects back to the client
-  if (response.status == 307) {
-    const url = new URL(response.headers.get("location") ?? "");
-    return redirect(url.pathname + url.search + url.hash);
-  } else if (!response.ok) {
-    throw response;
-  }
-
-  return await response.json();
-}
-
 export const shouldRevalidate: ShouldRevalidateFunction = (args) => {
+  // if (args.currentParams)
   if (args.formMethod === "POST") {
     return false;
   }
   return args.defaultShouldRevalidate;
 };
 
-export default function App() {
-  const params = useParams();
-  const fetcher = useFetcher<typeof action>();
-  const loaderData = useLoaderData<typeof loader>();
-  const data = fetcher.data ?? loaderData;
+function useRealtimeEvents({ channels }: { channels: string[] }) {
+  const params = new URLSearchParams(
+    channels.map((name) => ["channels", name])
+  );
+  return useEventSource(`/__/realtime/?${params}`, { event: "event" });
+}
 
-  const submitFormFast = useDebouncedCallback((form: HTMLFormElement) => {
-    fetcher.submit(form);
-  }, 250);
-  const submitFormSlow = useDebouncedCallback((form: HTMLFormElement) => {
-    fetcher.submit(form);
-  }, 1000);
+function useSubmitFormNoCancel({
+  fetcher,
+  onSubmit,
+}: {
+  fetcher: FetcherWithComponents<typeof action>;
+  onSubmit: () => void;
+}) {
+  const submitIsPendingRef = useRef(false);
+  useEffect(() => {
+    if (fetcher.state !== "idle" || !submitIsPendingRef.current) return;
+    submitIsPendingRef.current = false;
+    onSubmit();
+  }, [fetcher, fetcher.state, submitIsPendingRef]);
+  return () => {
+    if (fetcher.state === "submitting") {
+      submitIsPendingRef.current = true;
+    } else {
+      onSubmit();
+    }
+  };
+}
+
+export default function App() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const loaderData = useLoaderData<typeof loader>();
+  const fetcher = useFetcher<typeof action>();
+  const { children, state, channels, query_params } =
+    fetcher.data ?? loaderData;
+  const formRef = useRef<HTMLFormElement>(null);
+  const hooksEvent = useRealtimeEvents({ channels });
+  // console.log(channels, hooksEvent, query_params);
+  console.log(state["__run_status"]);
+
+  useEffect(() => {
+    let currentUrl = new URL(window.location.href);
+    let newSearchParams = new URLSearchParams(query_params);
+    console.log(
+      ">searchparams",
+      currentUrl.searchParams.toString(),
+      newSearchParams.toString()
+    );
+    if (currentUrl.searchParams.toString() == newSearchParams.toString())
+      return;
+    setSearchParams(newSearchParams);
+  }, [query_params]);
+
+  const submitFormNoCancel = useSubmitFormNoCancel({
+    fetcher,
+    onSubmit() {
+      if (formRef.current) fetcher.submit(formRef.current, { replace: true });
+    },
+  });
+  useEffect(() => {
+    submitFormNoCancel();
+  }, [hooksEvent]);
+
+  const submitForm = (form: HTMLFormElement) => submitFormNoCancel();
+  const submitFormFast = useDebouncedCallback(submitForm, 250);
+  const submitFormSlow = useDebouncedCallback(submitForm, 1000);
 
   const handleChange = (event: FormEvent<HTMLFormElement>) => {
     let target = event.target;
@@ -135,31 +214,21 @@ export default function App() {
 
   return (
     <>
-      {/*<JsonViewer*/}
-      {/*  style={{*/}
-      {/*    overflow: "scroll",*/}
-      {/*    marginTop: "1rem",*/}
-      {/*    maxHeight: "50vh",*/}
-      {/*  }}*/}
-      {/*  value={data}*/}
-      {/*  defaultInspectDepth={50}*/}
-      {/*  rootName={false}*/}
-      {/*></JsonViewer>*/}
       <fetcher.Form
-        action={"/" + params["*"]}
+        ref={formRef}
+        id={"gooey-form"}
+        action={"?" + searchParams}
         method="POST"
         onChange={handleChange}
       >
-        <RenderedChildren children={data.children} />
+        <RenderedChildren children={children} />
         <input
           type="hidden"
-          name="__gooey_state"
-          value={JSON.stringify(data.state)}
-        />
-        <input
-          type="hidden"
-          name="__gooey_transforms"
-          value={JSON.stringify(getTransforms({ children: data.children }))}
+          name="__gooey_gui_request_body"
+          value={JSON.stringify({
+            state,
+            transforms: getTransforms({ children: children }),
+          })}
         />
       </fetcher.Form>
     </>

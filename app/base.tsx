@@ -5,6 +5,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { marked } from "marked";
 import Select from "react-select";
+import { useSearchParams } from "@remix-run/react";
 
 type TreeNode = {
   name: string;
@@ -43,6 +44,8 @@ export function RenderedChildren({ children }: { children: Array<TreeNode> }) {
 }
 
 function RenderedTreeNode({ node }: { node: TreeNode }): any {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   let { name, props, children, style } = node;
   switch (name) {
     case "":
@@ -157,7 +160,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
       );
     case "button":
       return (
-        <button disabled={props.disabled} type={props.type}>
+        <button {...props}>
           <RenderedMarkdown body={props.label} />
         </button>
       );
@@ -288,10 +291,8 @@ function RenderedMarkdown({
   if (!body) return <></>;
   let html = marked.parse(body, {
     gfm: true,
-    headerIds: undefined,
-    langPrefix: undefined,
-    highlight: undefined,
-    mangle: undefined,
+    headerIds: false,
+    mangle: false,
   });
   // if (!allowUnsafeHTML) {
   //   html = sanitizeHtml(html);

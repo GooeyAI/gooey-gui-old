@@ -9,3 +9,15 @@ body {
 .gooey-output-text p {
   white-space: pre-wrap;
 }
+
+input[type="text"],
+textarea {
+  resize: vertical;
+  overflow-y: scroll;
+  width: 90%;
+  overflow: scroll;
+}
+
+input {
+  padding: 0.5rem;
+}

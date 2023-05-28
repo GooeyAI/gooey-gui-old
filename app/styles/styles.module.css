@@ -12,12 +12,6 @@
   height: auto;
 }
 
-.textArea {
-  resize: vertical;
-  overflow-y: scroll;
-  width: 100%;
-}
-
 .md {
   display: inline;
 }
