@@ -1,48 +1,11 @@
 # base node image
-FROM node:18-bullseye-slim as base
-
-# Install all node_modules, including dev dependencies
-FROM base as deps
+FROM node:18-bullseye-slim
 
 RUN mkdir /app
 WORKDIR /app
 
-ADD package.json package-lock.json ./
+COPY package.json package-lock.json ./
 RUN npm install --production=false
-
-# Setup production node_modules
-FROM base as production-deps
-
-RUN mkdir /app
-WORKDIR /app
-
-COPY --from=deps /app/node_modules /app/node_modules
-ADD package.json package-lock.json ./
-RUN npm prune --production
-
-# Build the app
-FROM base
-
-RUN mkdir /app
-WORKDIR /app
-
-COPY --from=deps /app/node_modules /app/node_modules
-
-#ADD . .
-#RUN npm run build
-
-# Finally, build the production image with minimal footprint
-#FROM base
-COPY --from=production-deps /app/node_modules /app/node_modules
-
-ENV NODE_ENV=production
-
-#RUN mkdir /app
-#WORKDIR /app
-#
-##My build goes to /app/server/build and i'm running /server/index.js express
-#COPY --from=build /app/build /app/build
-#COPY --from=build /app/public /app/public
 COPY . .
-
+ENV NODE_ENV=production
 CMD ["npm", "run", "start"]
