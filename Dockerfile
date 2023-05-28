@@ -43,6 +43,6 @@ ENV NODE_ENV=production
 ##My build goes to /app/server/build and i'm running /server/index.js express
 #COPY --from=build /app/build /app/build
 #COPY --from=build /app/public /app/public
-ADD . .
+COPY . .
 
 CMD ["npm", "run", "start"]
