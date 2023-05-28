@@ -33,13 +33,13 @@ COPY --from=deps /app/node_modules /app/node_modules
 
 # Finally, build the production image with minimal footprint
 #FROM base
+COPY --from=production-deps /app/node_modules /app/node_modules
 
 ENV NODE_ENV=production
 
 #RUN mkdir /app
 #WORKDIR /app
 #
-#COPY --from=production-deps /app/node_modules /app/node_modules
 ##My build goes to /app/server/build and i'm running /server/index.js express
 #COPY --from=build /app/build /app/build
 #COPY --from=build /app/public /app/public
