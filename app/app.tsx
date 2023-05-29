@@ -106,6 +106,8 @@ function parseIntFloat(val: FormDataEntryValue): number {
   const floatVal = parseFloat(strVal);
   if (floatVal == intVal) {
     return intVal;
+  } else if (isNaN(floatVal)) {
+    return 0;
   } else {
     return floatVal;
   }
