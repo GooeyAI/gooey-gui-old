@@ -12,11 +12,13 @@ export function handleRedirectResponse({
   if (!redirectStatuses.includes(response.status)) return null;
   // get the redirect target
   const redirectUrl = new URL(response.headers.get("location") ?? "/");
+  console.log(1, request.url, "->", redirectUrl.toString());
   // ensure that the redirect is to the same host as the request (i.e. the proxy)
   const requestUrl = new URL(request.url);
   if (redirectUrl.host == requestUrl.host) {
     redirectUrl.host = request.headers.get("host") ?? "";
   }
+  console.log(2, request.url, "->", redirectUrl.toString());
   response.headers.set("location", redirectUrl.toString());
   return redirectUrl;
 }
