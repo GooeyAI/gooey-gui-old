@@ -13,6 +13,7 @@ import process from "process";
 import { useDebouncedCallback } from "use-debounce";
 import { useEventSource } from "remix-utils";
 import path from "path";
+import { handleRedirectResponse } from "~/handleRedirect";
 
 export const meta: V2_MetaFunction = ({ data }) => {
   return data.meta ?? [];
@@ -66,45 +67,34 @@ async function _loader({
   request: Request;
 }) {
   const requestUrl = new URL(request.url);
-  const serverUrl = new URL(process.env["SERVER_HOST"]!);
-  const baseUrl = path.join(serverUrl.pathname);
-  serverUrl.pathname = path.join(baseUrl, params["*"] ?? "");
-  serverUrl.search = requestUrl.search;
+  const backendUrl = new URL(process.env["SERVER_HOST"]!);
+  backendUrl.pathname = path.join(backendUrl.pathname, params["*"] ?? "");
+  backendUrl.search = requestUrl.search;
 
   request.headers.set("Content-Type", "application/json");
-  const response = await fetch(serverUrl, {
+  const backendRequest = new Request(backendUrl, {
     method: "POST",
     redirect: "manual",
     body: JSON.stringify(body),
     headers: request.headers,
   });
 
-  // follow redirects back to the client
-  if (response.status == 307) {
-    // get the redirect url
-    const redirectUrl = new URL(response.headers.get("location") ?? "/");
-    // ensure that the redirect is to the same host as the request
-    if (redirectUrl.host == serverUrl.host) {
-      redirectUrl.host = request.headers.get("host") ?? "";
-    }
-    // ensure that the redirect is to the same base path as the request
-    if (redirectUrl.pathname.startsWith(baseUrl)) {
-      redirectUrl.pathname = redirectUrl.pathname.replace(baseUrl, "/");
-    }
+  const response = await fetch(backendRequest);
+  if (!response.ok) throw response;
+
+  const redirectUrl = handleRedirectResponse({
+    request: backendRequest,
+    response,
+  });
+  if (redirectUrl) {
     return redirect(redirectUrl.toString(), {
-      status: response.status,
       headers: response.headers,
+      status: response.status,
+      statusText: response.statusText,
     });
-  } else if (!response.ok) {
-    throw response;
   }
 
-  let responseJson = await response.json();
-
-  return json(responseJson, {
-    status: response.status,
-    headers: response.headers,
-  });
+  return response;
 }
 
 const formFieldToJson: Record<string, (val: FormDataEntryValue) => any> = {
