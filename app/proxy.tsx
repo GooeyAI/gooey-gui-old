@@ -24,14 +24,12 @@ async function _proxy({
   backendUrl.pathname = path.join(backendUrl.pathname, requestUrl.pathname);
   backendUrl.search = requestUrl.search;
 
-  const backendRequest = new Request(backendUrl, {
+  const response = await fetch(backendUrl, {
     method: request.method,
     redirect: "manual",
     body: request.body ? await request.arrayBuffer() : null,
     headers: request.headers,
   });
-
-  const response = await fetch(backendRequest);
-  handleRedirectResponse({ request: backendRequest, response });
+  handleRedirectResponse({ response });
   return response;
 }

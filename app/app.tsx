@@ -72,20 +72,16 @@ async function _loader({
   backendUrl.search = requestUrl.search;
 
   request.headers.set("Content-Type", "application/json");
-  const backendRequest = new Request(backendUrl, {
+
+  const response = await fetch(backendUrl, {
     method: "POST",
     redirect: "manual",
     body: JSON.stringify(body),
     headers: request.headers,
   });
-
-  const response = await fetch(backendRequest);
   if (!response.ok) throw response;
 
-  const redirectUrl = handleRedirectResponse({
-    request: backendRequest,
-    response,
-  });
+  const redirectUrl = handleRedirectResponse({ response });
   if (redirectUrl) {
     return redirect(redirectUrl, {
       headers: response.headers,
@@ -161,16 +157,16 @@ export default function App() {
   const formRef = useRef<HTMLFormElement>(null);
   const hooksEvent = useRealtimeEvents({ channels });
   // console.log(channels, hooksEvent, query_params);
-  console.log(state["__run_status"]);
+  // console.log(state["__run_status"]);
 
   useEffect(() => {
     let currentUrl = new URL(window.location.href);
     let newSearchParams = new URLSearchParams(query_params);
-    console.log(
-      ">searchparams",
-      currentUrl.searchParams.toString(),
-      newSearchParams.toString()
-    );
+    // console.log(
+    //   ">searchparams",
+    //   currentUrl.searchParams.toString(),
+    //   newSearchParams.toString()
+    // );
     if (currentUrl.searchParams.toString() == newSearchParams.toString())
       return;
     setSearchParams(newSearchParams);
@@ -179,27 +175,31 @@ export default function App() {
   const submitFormNoCancel = useSubmitFormNoCancel({
     fetcher,
     onSubmit() {
-      if (formRef.current) fetcher.submit(formRef.current, { replace: true });
+      submitForm(formRef.current);
     },
   });
   useEffect(() => {
-    submitFormNoCancel();
+    // if (hooksEvent) submitForm(formRef.current);
+    if (hooksEvent) submitFormNoCancel();
   }, [hooksEvent]);
 
-  const submitForm = (form: HTMLFormElement) => submitFormNoCancel();
-  const submitFormFast = useDebouncedCallback(submitForm, 250);
-  const submitFormSlow = useDebouncedCallback(submitForm, 1000);
+  const submitForm = (form: HTMLFormElement | null) => {
+    if (form) fetcher.submit(form, { replace: true });
+  };
+  // const submitFormFast = useDebouncedCallback(submitForm, 250);
+  // const submitFormSlow = useDebouncedCallback(submitForm, 1000);
 
   const handleChange = (event: FormEvent<HTMLFormElement>) => {
     let target = event.target;
     // ignore hidden inputs
     if (target instanceof HTMLInputElement && target.type === "hidden") return;
-    // debounce based on input type - generally text inputs are slow, everything else is fast
-    if (target instanceof HTMLElement && target.hasAttribute("slowdebounce")) {
-      submitFormSlow(event.currentTarget);
-    } else {
-      submitFormFast(event.currentTarget);
-    }
+    submitFormNoCancel();
+    // // debounce based on input type - generally text inputs are slow, everything else is fast
+    // if (target instanceof HTMLElement && target.hasAttribute("slowdebounce")) {
+    //   submitFormSlow(event.currentTarget);
+    // } else {
+    //   submitFormFast(event.currentTarget);
+    // }
   };
 
   return (

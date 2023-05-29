@@ -1,20 +1,19 @@
+import process from "process";
+
 const redirectStatuses = [301, 302, 303, 307, 308];
 
 export function handleRedirectResponse({
-  request,
   response,
 }: {
-  request: Request;
   response: Response;
-  basePath?: string;
 }): string | null {
   // if the response is not a redirect, return null
   if (!redirectStatuses.includes(response.status)) return null;
   // get the redirect target
-  const requestUrl = new URL(request.url);
+  const backendUrl = new URL(process.env["SERVER_HOST"]!);
   const redirectUrl = new URL(response.headers.get("location") ?? "/");
   let newLocation;
-  if (redirectUrl.host == requestUrl.host) {
+  if (redirectUrl.host == backendUrl.host) {
     // strip the proxy host/port from the redirect target, so the user stays on the same host
     newLocation = redirectUrl.pathname + redirectUrl.search + redirectUrl.hash;
   } else {
