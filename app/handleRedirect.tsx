@@ -7,26 +7,20 @@ export function handleRedirectResponse({
   request: Request;
   response: Response;
   basePath?: string;
-}): URL | null {
+}): string | null {
   // if the response is not a redirect, return null
   if (!redirectStatuses.includes(response.status)) return null;
   // get the redirect target
-  const redirectUrl = new URL(response.headers.get("location") ?? "/");
-  const old = redirectUrl.toString();
-  console.log("incoming request", request, response);
-  // ensure that the redirect is to the same host as the request (i.e. the proxy)
   const requestUrl = new URL(request.url);
+  const redirectUrl = new URL(response.headers.get("location") ?? "/");
+  let newLocation;
   if (redirectUrl.host == requestUrl.host) {
-    redirectUrl.host = request.headers.get("host") ?? "";
+    // strip the proxy host/port from the redirect target, so the user stays on the same host
+    newLocation = redirectUrl.pathname + redirectUrl.search + redirectUrl.hash;
+  } else {
+    // if the redirect target is a different host, redirect to the full URL
+    newLocation = redirectUrl.toString();
   }
-  console.log(
-    "handle redirect",
-    request.url,
-    "->",
-    old,
-    "->",
-    redirectUrl.toString()
-  );
-  response.headers.set("location", redirectUrl.toString());
-  return redirectUrl;
+  response.headers.set("location", newLocation);
+  return newLocation;
 }

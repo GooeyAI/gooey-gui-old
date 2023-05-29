@@ -87,7 +87,7 @@ async function _loader({
     response,
   });
   if (redirectUrl) {
-    return redirect(redirectUrl.toString(), {
+    return redirect(redirectUrl, {
       headers: response.headers,
       status: response.status,
       statusText: response.statusText,
