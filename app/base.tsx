@@ -54,7 +54,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
       return <pre style={style}>{props.body}</pre>;
     case "div":
       return (
-        <div style={style}>
+        <div style={style} {...props}>
           <RenderedChildren children={children} />
         </div>
       );

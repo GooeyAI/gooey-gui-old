@@ -4,7 +4,10 @@ const proxyUrls = [
   "/login/",
   "/logout/",
   "/account/",
-  "favicon.ico",
+  "/payment-success/",
+  "/favicon",
+  "/favicon.ico",
+  "/__/*",
 ];
 
 /** @type {import('@remix-run/dev').AppConfig} */

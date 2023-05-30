@@ -6,11 +6,10 @@ import type {
 import { useFetcher, useLoaderData, useSearchParams } from "@remix-run/react";
 import { getTransforms, RenderedChildren } from "~/base";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
 import type { FormEvent } from "react";
 import React, { useEffect, useRef } from "react";
 import process from "process";
-import { useDebouncedCallback } from "use-debounce";
 import { useEventSource } from "remix-utils";
 import path from "path";
 import { handleRedirectResponse } from "~/handleRedirect";
@@ -158,17 +157,10 @@ export default function App() {
     fetcher.data ?? loaderData;
   const formRef = useRef<HTMLFormElement>(null);
   const hooksEvent = useRealtimeEvents({ channels });
-  // console.log(channels, hooksEvent, query_params);
-  // console.log(state["__run_status"]);
 
   useEffect(() => {
     let currentUrl = new URL(window.location.href);
     let newSearchParams = new URLSearchParams(query_params);
-    // console.log(
-    //   ">searchparams",
-    //   currentUrl.searchParams.toString(),
-    //   newSearchParams.toString()
-    // );
     if (currentUrl.searchParams.toString() == newSearchParams.toString())
       return;
     setSearchParams(newSearchParams);
@@ -212,6 +204,7 @@ export default function App() {
         action={"?" + searchParams}
         method="POST"
         onChange={handleChange}
+        noValidate
       >
         <RenderedChildren children={children} />
         <input
