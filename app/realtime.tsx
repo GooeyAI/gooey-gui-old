@@ -21,6 +21,7 @@ export async function loader({ params, request }: LoaderArgs) {
       if (await redis.exists(channels)) onMsg();
     });
     subscriber.subscribe(channels, (msg, channel) => {
+      console.log("onMsg", channel, msg);
       onMsg();
     });
     function onMsg() {
