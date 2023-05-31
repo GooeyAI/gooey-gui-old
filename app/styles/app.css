@@ -12,10 +12,6 @@ video {
   height: auto;
 }
 
-body {
-  padding: 0 5%;
-}
-
 .gooey-output-text {
   overflow-y: scroll;
 }
