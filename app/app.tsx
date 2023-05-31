@@ -1,19 +1,24 @@
 import type {
-  FetcherWithComponents,
   ShouldRevalidateFunction,
   V2_MetaFunction,
 } from "@remix-run/react";
-import { useFetcher, useLoaderData, useSearchParams } from "@remix-run/react";
+import {
+  Form,
+  useActionData,
+  useFetcher,
+  useLoaderData,
+  useSearchParams,
+  useSubmit,
+} from "@remix-run/react";
 import { getTransforms, RenderedChildren } from "~/base";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import type { FormEvent } from "react";
 import React, { useEffect, useRef } from "react";
 import process from "process";
-import { useEventSource } from "remix-utils";
 import path from "path";
 import { handleRedirectResponse } from "~/handleRedirect";
-import { useDebouncedCallback } from "use-debounce";
+import { useEventSourceNullOk } from "~/event-source";
 
 export const meta: V2_MetaFunction = ({ data }) => {
   return data.meta ?? [];
@@ -123,58 +128,36 @@ export const shouldRevalidate: ShouldRevalidateFunction = (args) => {
   return args.defaultShouldRevalidate;
 };
 
-function useRealtimeEvents({ channels }: { channels: string[] }) {
-  const params = new URLSearchParams(
-    channels.map((name) => ["channels", name])
-  );
-  return useEventSource(`/__/realtime/?${params}`, { event: "event" });
-}
-
-function useSubmitFormNoCancel({
-  fetcher,
-  onSubmit,
-}: {
-  fetcher: FetcherWithComponents<typeof action>;
-  onSubmit: () => void;
-}) {
-  const submitIsPendingRef = useRef(false);
-  useEffect(() => {
-    if (fetcher.state !== "idle" || !submitIsPendingRef.current) return;
-    submitIsPendingRef.current = false;
-    onSubmit();
-  }, [fetcher, fetcher.state, submitIsPendingRef]);
-  return () => {
-    if (fetcher.state === "submitting") {
-      submitIsPendingRef.current = true;
-    } else {
-      onSubmit();
-    }
-  };
+function useRealtimeChannels({ channels }: { channels: string[] }) {
+  let url;
+  if (channels.length) {
+    const params = new URLSearchParams(
+      channels.map((name) => ["channels", name])
+    );
+    url = `/__/realtime/?${params}`;
+  }
+  return useEventSourceNullOk(url);
 }
 
 export default function App() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const loaderData = useLoaderData<typeof loader>();
-  const fetcher = useFetcher<typeof action>();
-  const { children, state, channels } = fetcher.data ?? loaderData;
+  const actionData = useActionData<typeof action>();
+  const submit = useSubmit();
+  const { children, state, channels } = actionData ?? loaderData;
   const formRef = useRef<HTMLFormElement>(null);
-  const realtimeEvent = useRealtimeEvents({ channels });
+  const realtimeEvent = useRealtimeChannels({ channels });
+  const fetcher = useFetcher();
 
   useEffect(() => {
-    // if (realtimeEvents) submitForm(formRef.current);
-    if (realtimeEvent) submitFormNoCancel();
-  }, [realtimeEvent]);
+    if (realtimeEvent && fetcher.state === "idle" && formRef.current) {
+      submit(formRef.current);
+    }
+  }, [fetcher.state, realtimeEvent, submit]);
 
-  const submitFormNoCancel = useSubmitFormNoCancel({
-    fetcher,
-    onSubmit() {
-      submitForm(formRef.current);
-    },
-  });
-
-  const submitForm = (form: HTMLFormElement | null) => {
-    if (form) fetcher.submit(form, { replace: true });
-  };
+  // const submitForm = (form: HTMLFormElement | null) => {
+  //   if (form) fetcher.submit(form, { replace: true });
+  // };
   // const submitFormFast = useDebouncedCallback(submitForm, 250);
   // const submitFormSlow = useDebouncedCallback(submitForm, 1000);
 
@@ -182,7 +165,9 @@ export default function App() {
     let target = event.target;
     // ignore hidden inputs
     if (target instanceof HTMLInputElement && target.type === "hidden") return;
-    submitFormNoCancel();
+    submit(event.currentTarget);
+    // formRef.current?.submit();
+    // submitFormNoCancel();
     // // debounce based on input type - generally text inputs are slow, everything else is fast
     // if (target instanceof HTMLElement && target.hasAttribute("slowdebounce")) {
     //   submitFormSlow(event.currentTarget);
@@ -195,7 +180,7 @@ export default function App() {
 
   return (
     <>
-      <fetcher.Form
+      <Form
         ref={formRef}
         id={"gooey-form"}
         action={"?" + searchParams}
@@ -209,7 +194,7 @@ export default function App() {
           name="__gooey_gui_request_body"
           value={JSON.stringify({ state, transforms })}
         />
-      </fetcher.Form>
+      </Form>
     </>
   );
 }
