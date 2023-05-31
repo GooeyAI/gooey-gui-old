@@ -13,6 +13,7 @@ import process from "process";
 import { useEventSource } from "remix-utils";
 import path from "path";
 import { handleRedirectResponse } from "~/handleRedirect";
+import { useDebouncedCallback } from "use-debounce";
 
 export const meta: V2_MetaFunction = ({ data }) => {
   return data.meta ?? [];
@@ -28,7 +29,7 @@ export const meta: V2_MetaFunction = ({ data }) => {
 // };
 
 export async function loader({ params, request }: LoaderArgs) {
-  return await _loader({ body: {}, params, request });
+  return await callServer({ body: {}, params, request });
 }
 
 export async function action({ params, request }: ActionArgs) {
@@ -53,10 +54,10 @@ export async function action({ params, request }: ActionArgs) {
   }
   // update state with new form data
   body.state = { ...state, ...inputs };
-  return await _loader({ body, params, request });
+  return callServer({ body, params, request });
 }
 
-async function _loader({
+async function callServer({
   body,
   params,
   request,
@@ -66,19 +67,18 @@ async function _loader({
   request: Request;
 }) {
   const requestUrl = new URL(request.url);
-  const backendUrl = new URL(process.env["SERVER_HOST"]!);
-  backendUrl.pathname = path.join(backendUrl.pathname, params["*"] ?? "");
-  backendUrl.search = requestUrl.search;
+  const serverUrl = new URL(process.env["SERVER_HOST"]!);
+  serverUrl.pathname = path.join(serverUrl.pathname, params["*"] ?? "");
+  serverUrl.search = requestUrl.search;
 
   request.headers.set("Content-Type", "application/json");
 
-  const response = await fetch(backendUrl, {
+  const response = await fetch(serverUrl, {
     method: "POST",
     redirect: "manual",
     body: JSON.stringify(body),
     headers: request.headers,
   });
-  if (!response.ok) throw response;
 
   const redirectUrl = handleRedirectResponse({ response });
   if (redirectUrl) {
@@ -89,6 +89,7 @@ async function _loader({
     });
   }
 
+  if (!response.ok) throw response;
   return response;
 }
 
@@ -113,8 +114,10 @@ function parseIntFloat(val: FormDataEntryValue): number {
 }
 
 export const shouldRevalidate: ShouldRevalidateFunction = (args) => {
-  // if (args.currentParams)
-  if (args.formMethod === "POST") {
+  if (
+    args.formMethod === "POST" &&
+    args.currentUrl.toString() === args.nextUrl.toString()
+  ) {
     return false;
   }
   return args.defaultShouldRevalidate;
@@ -153,18 +156,14 @@ export default function App() {
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
-  const { children, state, channels, query_params } =
-    fetcher.data ?? loaderData;
+  const { children, state, channels } = fetcher.data ?? loaderData;
   const formRef = useRef<HTMLFormElement>(null);
-  const hooksEvent = useRealtimeEvents({ channels });
+  const realtimeEvent = useRealtimeEvents({ channels });
 
   useEffect(() => {
-    let currentUrl = new URL(window.location.href);
-    let newSearchParams = new URLSearchParams(query_params);
-    if (currentUrl.searchParams.toString() == newSearchParams.toString())
-      return;
-    setSearchParams(newSearchParams);
-  }, [query_params]);
+    // if (realtimeEvents) submitForm(formRef.current);
+    if (realtimeEvent) submitFormNoCancel();
+  }, [realtimeEvent]);
 
   const submitFormNoCancel = useSubmitFormNoCancel({
     fetcher,
@@ -172,10 +171,6 @@ export default function App() {
       submitForm(formRef.current);
     },
   });
-  useEffect(() => {
-    // if (hooksEvent) submitForm(formRef.current);
-    if (hooksEvent) submitFormNoCancel();
-  }, [hooksEvent]);
 
   const submitForm = (form: HTMLFormElement | null) => {
     if (form) fetcher.submit(form, { replace: true });
@@ -196,6 +191,8 @@ export default function App() {
     // }
   };
 
+  const transforms = getTransforms({ children });
+
   return (
     <>
       <fetcher.Form
@@ -210,10 +207,7 @@ export default function App() {
         <input
           type="hidden"
           name="__gooey_gui_request_body"
-          value={JSON.stringify({
-            state,
-            transforms: getTransforms({ children: children }),
-          })}
+          value={JSON.stringify({ state, transforms })}
         />
       </fetcher.Form>
     </>
