@@ -19,6 +19,7 @@ import process from "process";
 import path from "path";
 import { handleRedirectResponse } from "~/handleRedirect";
 import { useEventSourceNullOk } from "~/event-source";
+import { useDebouncedCallback } from "use-debounce";
 
 export const meta: V2_MetaFunction = ({ data }) => {
   return data.meta ?? [];
@@ -155,25 +156,18 @@ export default function App() {
     }
   }, [fetcher.state, realtimeEvent, submit]);
 
-  // const submitForm = (form: HTMLFormElement | null) => {
-  //   if (form) fetcher.submit(form, { replace: true });
-  // };
-  // const submitFormFast = useDebouncedCallback(submitForm, 250);
-  // const submitFormSlow = useDebouncedCallback(submitForm, 1000);
+  const debouncedSubmit = useDebouncedCallback(submit, 500);
 
   const handleChange = (event: FormEvent<HTMLFormElement>) => {
     let target = event.target;
     // ignore hidden inputs
     if (target instanceof HTMLInputElement && target.type === "hidden") return;
-    submit(event.currentTarget);
-    // formRef.current?.submit();
-    // submitFormNoCancel();
-    // // debounce based on input type - generally text inputs are slow, everything else is fast
-    // if (target instanceof HTMLElement && target.hasAttribute("slowdebounce")) {
-    //   submitFormSlow(event.currentTarget);
-    // } else {
-    //   submitFormFast(event.currentTarget);
-    // }
+    // debounce based on input type - generally text inputs are slow, everything else is fast
+    if (target instanceof HTMLElement && target.hasAttribute("slow_debounce")) {
+      debouncedSubmit(event.currentTarget);
+    } else {
+      submit(event.currentTarget);
+    }
   };
 
   const transforms = getTransforms({ children });
