@@ -1,11 +1,11 @@
-import styles from "~/styles/styles.module.css";
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { JsonViewer } from "@textea/json-viewer";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { marked } from "marked";
 import Select from "react-select";
-import { useSearchParams } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 
 type TreeNode = {
   name: string;
@@ -44,14 +44,51 @@ export function RenderedChildren({ children }: { children: Array<TreeNode> }) {
 }
 
 function RenderedTreeNode({ node }: { node: TreeNode }): any {
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  let { name, props, children, style } = node;
+  const { name, props, children, style } = node;
   switch (name) {
     case "":
       return <RenderedChildren children={children} />;
+    case "nav-tab-content":
+      return (
+        <div className="tab-content">
+          <div className="tab-pane show active" role="tabpanel">
+            <RenderedChildren children={children} />
+          </div>
+        </div>
+      );
+
+    case "nav-tabs":
+      return (
+        <ul className="nav nav-tabs" role="tablist" style={style} {...props}>
+          <RenderedChildren children={children} />
+        </ul>
+      );
+    case "nav-item":
+      return (
+        <Link to={props.href} {...props.attrs}>
+          <li className="nav-item" role="presentation">
+            <button
+              className={`nav-link ${props.active ? "active" : ""}`}
+              type="button"
+              role="tab"
+              aria-controls="run"
+              aria-selected="true"
+            >
+              <p className="mb-0">
+                <RenderedChildren children={children} />
+              </p>
+            </button>
+          </li>
+        </Link>
+      );
     case "pre":
       return <pre style={style}>{props.body}</pre>;
+    case "ul":
+      return (
+        <ul style={style} {...props}>
+          <RenderedChildren children={children} />
+        </ul>
+      );
     case "div":
       return (
         <div style={style} {...props}>
@@ -89,7 +126,6 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
         <>
           <RenderedMarkdown body={props.caption} />
           <img
-            className={styles.img}
             style={style}
             src={props.src}
             alt={props.caption}
@@ -104,40 +140,31 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
       return (
         <>
           <RenderedMarkdown body={props.caption} />
-          <video
-            style={style}
-            className={styles.video}
-            controls
-            src={props.src}
-          ></video>
+          <video style={style} controls src={props.src}></video>
         </>
       );
     case "audio":
       return (
         <>
           <RenderedMarkdown body={props.caption} />
-          <audio
-            style={style}
-            className={styles.audio}
-            controls
-            src={props.src}
-          ></audio>
+          <audio style={style} controls src={props.src}></audio>
         </>
       );
     case "html":
       return (
-        <div
+        <article
+          className="htmlContainer"
           style={style}
           dangerouslySetInnerHTML={{
             __html: props.body,
           }}
-        ></div>
+        ></article>
       );
     case "markdown":
       return (
         <RenderedMarkdown
           body={props.body}
-          allowUnsafeHTML={props.unsafe_allow_html || false}
+          // allowUnsafeHTML={props.unsafe_allow_html || false}
         />
       );
     case "textarea":
@@ -145,7 +172,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
         <div>
           <RenderedMarkdown body={props.label} />
           <div>
-            <textarea className={styles.textArea} style={style} {...props} />
+            <textarea style={style} {...props} />
           </div>
         </div>
       );
@@ -224,7 +251,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
       return <td>{<RenderedChildren children={children} />}</td>;
     default:
       return (
-        <div className={styles.md}>
+        <div>
           <pre>
             <code>{JSON.stringify(node)}</code>
           </pre>
@@ -281,11 +308,11 @@ function Details({
 
 function RenderedMarkdown({
   body,
-  allowUnsafeHTML,
+  // allowUnsafeHTML,
   style,
 }: {
   body: string;
-  allowUnsafeHTML?: boolean;
+  // allowUnsafeHTML?: boolean;
   style?: Record<string, string>;
 }) {
   if (!body) return <></>;
@@ -298,10 +325,6 @@ function RenderedMarkdown({
   //   html = sanitizeHtml(html);
   // }
   return (
-    <div
-      dangerouslySetInnerHTML={{ __html: html }}
-      className={styles.md}
-      style={style}
-    ></div>
+    <article dangerouslySetInnerHTML={{ __html: html }} style={style}></article>
   );
 }

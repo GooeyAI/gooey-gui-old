@@ -1,0 +1,46 @@
+img {
+  width: 100%;
+  height: auto;
+}
+
+audio {
+  width: 100%;
+}
+
+video {
+  width: 100%;
+  height: auto;
+}
+
+body {
+  padding: 0 5%;
+}
+
+.gooey-output-text {
+  overflow-y: scroll;
+}
+
+.gooey-output-text p {
+  white-space: pre-wrap;
+}
+
+input[type="text"],
+textarea {
+  resize: vertical;
+  width: 90%;
+  overflow: scroll;
+}
+
+code {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+pre {
+  max-width: 100%;
+  max-height: 20rem;
+  overflow: scroll;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
