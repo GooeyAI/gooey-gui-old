@@ -110,6 +110,7 @@ async function callServer({
   serverUrl.search = requestUrl.search;
 
   request.headers.set("Content-Type", "application/json");
+  request.headers.delete("Host");
 
   const response = await fetch(serverUrl, {
     method: "POST",

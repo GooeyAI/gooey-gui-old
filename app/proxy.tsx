@@ -23,7 +23,7 @@ async function _proxy({
   const backendUrl = new URL(process.env["SERVER_HOST"]!);
   backendUrl.pathname = path.join(backendUrl.pathname, requestUrl.pathname);
   backendUrl.search = requestUrl.search;
-
+  request.headers.delete("Host");
   const response = await fetch(backendUrl, {
     method: request.method,
     redirect: "manual",
