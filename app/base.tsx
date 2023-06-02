@@ -37,9 +37,9 @@ export function getTransforms({
 }
 
 export function RenderedChildren({ children }: { children: Array<TreeNode> }) {
-  let elements = children.map((node, idx) => (
-    <RenderedTreeNode key={idx} node={node} />
-  ));
+  let elements = children.map((node, idx) => {
+    return <RenderedTreeNode key={node.props.name || idx} node={node} />;
+  });
   return <>{elements}</>;
 }
 
