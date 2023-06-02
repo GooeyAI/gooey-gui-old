@@ -38,7 +38,13 @@ export function getTransforms({
 
 export function RenderedChildren({ children }: { children: Array<TreeNode> }) {
   let elements = children.map((node, idx) => {
-    return <RenderedTreeNode key={node.props.name || idx} node={node} />;
+    let key;
+    if (node.props.name) {
+      key = `input:${node.props.name}:${node.props.value}`;
+    } else {
+      key = `idx:${idx}`;
+    }
+    return <RenderedTreeNode key={key} node={node} />;
   });
   return <>{elements}</>;
 }
