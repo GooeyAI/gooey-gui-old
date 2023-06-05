@@ -16,7 +16,7 @@ cp .env.example .env
 ```
 6. Either start the [python server](https://github.com/dara-network/ddgai/) on `localhost:8080`, or if you're lazy, use the test server in `.env` -
 ```bash
-SERVER_HOST=https://gooey-test.us-1.gooey.ai
+SERVER_HOST=http://gooey-test.us-1.gooey.ai
 ```
 7. Start remix server
 ```bash
