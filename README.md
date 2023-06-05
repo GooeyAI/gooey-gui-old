@@ -4,8 +4,12 @@
 ```bash
 nvm install 18.12.0
 ```
-3. Install redis (if you don't already) using [brew](https://redis.io/docs/getting-started/installation/install-redis-on-mac-os/)
-3. Clone this repo
+2. Install redis (if you don't already) using [brew](https://redis.io/docs/getting-started/installation/install-redis-on-mac-os/)
+```bash
+brew install redis
+brew services start redis
+```
+4. Clone this repo
 4. cd into your cloned directory & install dependencies
 ```bash
 npm install
