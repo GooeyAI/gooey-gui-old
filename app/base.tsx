@@ -6,6 +6,7 @@ import "react-tabs/style/react-tabs.css";
 import { marked } from "marked";
 import Select from "react-select";
 import { Link } from "@remix-run/react";
+import { ClientJsFix } from "~/clientJsFix";
 
 type TreeNode = {
   name: string;
@@ -36,7 +37,13 @@ export function getTransforms({
   return ret;
 }
 
-export function RenderedChildren({ children }: { children: Array<TreeNode> }) {
+export function RenderedChildren({
+  children,
+  onChange,
+}: {
+  children: Array<TreeNode>;
+  onChange: () => void;
+}) {
   let elements = children.map((node, idx) => {
     let key;
     if (node.props.name) {
@@ -44,21 +51,78 @@ export function RenderedChildren({ children }: { children: Array<TreeNode> }) {
     } else {
       key = `idx:${idx}`;
     }
-    return <RenderedTreeNode key={key} node={node} />;
+    return <RenderedTreeNode key={key} node={node} onChange={onChange} />;
   });
   return <>{elements}</>;
 }
 
-function RenderedTreeNode({ node }: { node: TreeNode }): any {
+function SelectElement({
+  props,
+  onChange,
+}: {
+  props: Record<string, any>;
+  onChange: () => void;
+}) {
+  let inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <label htmlFor={props.name}>
+        <RenderedMarkdown body={props.label} />
+      </label>
+      <input
+        ref={inputRef}
+        type="hidden"
+        name={props.name}
+        value={
+          props.defaultValue
+            ? props.isMulti
+              ? JSON.stringify(props.defaultValue.map((opt: any) => opt.value))
+              : JSON.stringify(props.defaultValue.value)
+            : undefined
+        }
+      />
+      <ClientJsFix>
+        <Select
+          {...props}
+          name={undefined}
+          // delimiter=","
+          isMulti={props.isMulti}
+          onChange={(newValue: any) => {
+            const el = inputRef.current;
+            if (!el) return;
+            if (newValue === undefined) {
+              el.value = "";
+            } else if (!newValue) {
+              el.value = JSON.stringify(newValue);
+            } else if (props.isMulti) {
+              el.value = JSON.stringify(newValue.map((opt: any) => opt.value));
+            } else {
+              el.value = JSON.stringify(newValue.value);
+            }
+            onChange();
+          }}
+        />
+      </ClientJsFix>
+    </>
+  );
+}
+
+function RenderedTreeNode({
+  node,
+  onChange,
+}: {
+  node: TreeNode;
+  onChange: () => void;
+}) {
   const { name, props, children, style } = node;
   switch (name) {
     case "":
-      return <RenderedChildren children={children} />;
+      return <RenderedChildren children={children} onChange={onChange} />;
     case "nav-tab-content":
       return (
         <div className="tab-content">
           <div className="tab-pane show active" role="tabpanel">
-            <RenderedChildren children={children} />
+            <RenderedChildren children={children} onChange={onChange} />
           </div>
         </div>
       );
@@ -66,7 +130,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
     case "nav-tabs":
       return (
         <ul className="nav nav-tabs" role="tablist" style={style} {...props}>
-          <RenderedChildren children={children} />
+          <RenderedChildren children={children} onChange={onChange} />
         </ul>
       );
     case "nav-item":
@@ -81,7 +145,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
               aria-selected="true"
             >
               <p className="mb-0">
-                <RenderedChildren children={children} />
+                <RenderedChildren children={children} onChange={onChange} />
               </p>
             </button>
           </li>
@@ -92,13 +156,13 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
     case "ul":
       return (
         <ul style={style} {...props}>
-          <RenderedChildren children={children} />
+          <RenderedChildren children={children} onChange={onChange} />
         </ul>
       );
     case "div":
       return (
         <div style={style} {...props}>
-          <RenderedChildren children={children} />
+          <RenderedChildren children={children} onChange={onChange} />
         </div>
       );
     case "tabs":
@@ -109,7 +173,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
       ));
       let panels = children.map((elem) => (
         <TabPanel key={elem.props.label} style={elem.style}>
-          <RenderedChildren children={elem.children} />
+          <RenderedChildren children={elem.children} onChange={onChange} />
         </TabPanel>
       ));
       return (
@@ -124,7 +188,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
           open={props.open}
           summary={<RenderedMarkdown body={props.label} />}
         >
-          <RenderedChildren children={children} />
+          <RenderedChildren children={children} onChange={onChange} />
         </Details>
       );
     case "img":
@@ -158,13 +222,13 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
       );
     case "html":
       return (
-        <article
+        <span
           className="htmlContainer"
           style={style}
           dangerouslySetInnerHTML={{
             __html: props.body,
           }}
-        ></article>
+        ></span>
       );
     case "markdown":
       return (
@@ -198,33 +262,7 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
         </button>
       );
     case "select":
-      return (
-        <>
-          <label>
-            <RenderedMarkdown body={props.label} />
-          </label>
-          <select style={style} {...props}>
-            <RenderedChildren children={children} />
-          </select>
-        </>
-      );
-    case "multiselect":
-      return (
-        <>
-          <label>
-            <RenderedMarkdown body={props.label} />
-          </label>
-          <Select
-            defaultValue={props.defaultValue}
-            isMulti
-            isDisabled={props.disabled}
-            name={props.name}
-            options={props.options}
-            className="basic-multi-select"
-            classNamePrefix="select"
-          />
-        </>
-      );
+      return <SelectElement props={props} onChange={onChange} />;
     case "option":
       return (
         <option style={style} {...props}>
@@ -233,28 +271,48 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
       );
     case "json":
       return (
-        <JsonViewer
-          style={{
-            overflow: "scroll",
-            marginTop: "1rem",
-          }}
-          value={props.value}
-          defaultInspectDepth={props.defaultInspectDepth}
-          rootName={false}
-        ></JsonViewer>
+        <ClientJsFix>
+          <JsonViewer
+            style={{
+              overflow: "scroll",
+              marginTop: "1rem",
+            }}
+            value={props.value}
+            defaultInspectDepth={props.defaultInspectDepth}
+            rootName={false}
+          ></JsonViewer>
+        </ClientJsFix>
       );
     case "table":
-      return <table>{<RenderedChildren children={children} />}</table>;
+      return (
+        <table>
+          {<RenderedChildren children={children} onChange={onChange} />}
+        </table>
+      );
     case "thead":
-      return <thead>{<RenderedChildren children={children} />}</thead>;
+      return (
+        <thead>
+          {<RenderedChildren children={children} onChange={onChange} />}
+        </thead>
+      );
     case "tbody":
-      return <tbody>{<RenderedChildren children={children} />}</tbody>;
+      return (
+        <tbody>
+          {<RenderedChildren children={children} onChange={onChange} />}
+        </tbody>
+      );
     case "tr":
-      return <tr>{<RenderedChildren children={children} />}</tr>;
+      return (
+        <tr>{<RenderedChildren children={children} onChange={onChange} />}</tr>
+      );
     case "th":
-      return <th>{<RenderedChildren children={children} />}</th>;
+      return (
+        <th>{<RenderedChildren children={children} onChange={onChange} />}</th>
+      );
     case "td":
-      return <td>{<RenderedChildren children={children} />}</td>;
+      return (
+        <td>{<RenderedChildren children={children} onChange={onChange} />}</td>
+      );
     default:
       return (
         <div>
@@ -266,13 +324,13 @@ function RenderedTreeNode({ node }: { node: TreeNode }): any {
   }
 }
 
-function Details({
+export function Details({
   open,
   summary,
   children,
 }: {
   open?: boolean;
-  summary: JSX.Element;
+  summary: React.JSX.Element;
   children: ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(open);
@@ -331,6 +389,10 @@ function RenderedMarkdown({
   //   html = sanitizeHtml(html);
   // }
   return (
-    <article dangerouslySetInnerHTML={{ __html: html }} style={style}></article>
+    <span
+      className="htmlContainer"
+      dangerouslySetInnerHTML={{ __html: html }}
+      style={style}
+    ></span>
   );
 }

@@ -136,7 +136,7 @@ const formFieldToJson: Record<string, (val: FormDataEntryValue) => any> = {
   checkbox: Boolean,
   number: parseIntFloat,
   range: parseIntFloat,
-  select: (val) => JSON.parse(val.toString()),
+  select: (val) => (val ? JSON.parse(`${val}`) : null),
 };
 
 function parseIntFloat(val: FormDataEntryValue): number {
@@ -193,10 +193,11 @@ export default function App() {
 
   const handleChange = (event: FormEvent<HTMLFormElement>) => {
     let target = event.target;
-    // ignore hidden inputs
-    if (target instanceof HTMLInputElement && target.type === "hidden") return;
     // debounce based on input type - generally text inputs are slow, everything else is fast
-    if (target instanceof HTMLElement && target.hasAttribute("slow_debounce")) {
+    if (
+      target instanceof HTMLInputElement &&
+      ["text", "textarea"].includes(target.type)
+    ) {
       debouncedSubmit(event.currentTarget);
     } else {
       submit(event.currentTarget);
@@ -216,7 +217,12 @@ export default function App() {
         noValidate
       >
         <div className="container mt-5">
-          <RenderedChildren children={children} />
+          <RenderedChildren
+            children={children}
+            onChange={() => {
+              if (formRef.current) submit(formRef.current);
+            }}
+          />
         </div>
         <input
           type="hidden"
