@@ -1,9 +1,12 @@
 # Gooey-GUI Quickstart
 
-1. Install Node lts version (v18) using [nvm](https://github.com/nvm-sh/nvm)
-2. Install redis (if you don't already) using [brew](https://redis.io/docs/getting-started/installation/install-redis-on-mac-os/)
+1. Install Node LTS version (v18) using [nvm](https://github.com/nvm-sh/nvm)
+```bash
+nvm install 18.12.0
+```
+3. Install redis (if you don't already) using [brew](https://redis.io/docs/getting-started/installation/install-redis-on-mac-os/)
 3. Clone this repo
-4. Install dependencies
+4. cd into your cloned directory & install dependencies
 ```bash
 npm install
 ```
