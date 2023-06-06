@@ -65,7 +65,7 @@ function SelectElement({
 }) {
   let inputRef = useRef<HTMLInputElement>(null);
   return (
-    <>
+    <div className={"gooeySelect"}>
       <label htmlFor={props.name}>
         <RenderedMarkdown body={props.label} />
       </label>
@@ -103,7 +103,7 @@ function SelectElement({
           }}
         />
       </ClientJsFix>
-    </>
+    </div>
   );
 }
 
@@ -184,12 +184,12 @@ function RenderedTreeNode({
       );
     case "details":
       return (
-        <Details
-          open={props.open}
-          summary={<RenderedMarkdown body={props.label} />}
-        >
-          <RenderedChildren children={children} onChange={onChange} />
-        </Details>
+            <Details
+              open={props.open}
+              summary={<RenderedMarkdown body={props.label} />}
+            >
+              <RenderedChildren children={children} onChange={onChange} />
+            </Details>
       );
     case "img":
       return (
@@ -239,7 +239,7 @@ function RenderedTreeNode({
       );
     case "textarea":
       return (
-        <div>
+        <div className="gooeyInputOrTextArea">
           <RenderedMarkdown body={props.label} />
           <div>
             <textarea style={style} {...props} />
@@ -248,7 +248,7 @@ function RenderedTreeNode({
       );
     case "input":
       return (
-        <div>
+        <div className="gooeyInputOrTextArea">
           <label>
             <RenderedMarkdown body={props.label} />
           </label>
@@ -256,11 +256,11 @@ function RenderedTreeNode({
         </div>
       );
     case "button":
-      return (
-        <button {...props}>
-          <RenderedMarkdown body={props.label} />
-        </button>
-      );
+          return (
+            <button type="button" className={"btn btn-theme"}  {...props}>
+              <RenderedMarkdown body={props.label} />
+            </button>
+          );
     case "select":
       return <SelectElement props={props} onChange={onChange} />;
     case "option":
@@ -344,22 +344,24 @@ export function Details({
   }, [isOpen]);
 
   return (
-    <div style={{ border: "1px solid gray" }}>
+    <div className="gooeyDetails" >
       <input hidden={true} type="checkbox" ref={ref} name={"magic"} />
-      <div
+      <div className="gooeyDetailsHeader"
         onClick={() => {
           ref.current!.checked = !isOpen;
           setIsOpen(!isOpen);
         }}
         style={{
           userSelect: "none",
-          backgroundColor: "lightgrey",
+          backgroundColor: isOpen ? "#f2f2f2" :"initial",
         }}
       >
-        {isOpen ? "▼" : "▶"}
+          <div style={{float: "right"}}>
+                {isOpen ? "⌄" : "⌃"}
+          </div>
         {summary}
       </div>
-      <div
+      <div className="gooeyDetailsBody"
         style={{
           display: isOpen ? "block" : "none",
         }}

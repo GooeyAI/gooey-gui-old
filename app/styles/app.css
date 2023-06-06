@@ -24,7 +24,7 @@ input[type="text"],
 textarea {
   resize: vertical;
   width: 90%;
-  overflow: scroll;
+  overflow: auto;
 }
 
 code {
@@ -43,4 +43,60 @@ pre {
 
 .htmlContainer {
   display: contents;
+}
+
+
+
+.gooeyOuter {
+
+}
+.gooeyInputOrTextArea, .gooeySelect {
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
+.gooeyInputOrTextArea h3, .gooeyInputOrTextArea h5, .gooeySelect h4, .gooeySelect h5  {
+  font-size: 16px;
+  color: #000000;
+  word-wrap: break-word;
+  font-family: "Space Grotesk", sans-serif;
+  background-color: rgba(0, 0, 0, 0.05);
+  display: inline-block;
+  line-height: 20px;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  letter-spacing: 1px;
+  /*
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 400;
+
+   */
+}
+
+.gooeyInputOrTextArea p {
+    color: rgba(0, 0, 0, 0.45);
+}
+
+.btn p, .gooeyDetailsHeader p {
+  margin-bottom: 0px;
+}
+
+.gooeyDetails {
+  border-radius: 0.375rem;
+  border-color: #dee2e6;
+  border-width: 1px;
+    /* background-color: aqua; */
+  border-style: solid;
+  margin-bottom: 10px;
+}
+.gooeyDetailsHeader {
+  padding: 16px 20px ;
+}
+
+.gooeyDetailsBody {
+    padding: 16px 20px;
+
 }

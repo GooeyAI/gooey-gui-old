@@ -216,7 +216,7 @@ export default function App() {
         onChange={handleChange}
         noValidate
       >
-        <div className="container mt-5">
+        <div className="container mt-5 gooeyOuterDiv">
           <RenderedChildren
             children={children}
             onChange={() => {

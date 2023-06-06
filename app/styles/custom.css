@@ -107,8 +107,8 @@ h2 {
   font-family: "Space Grotesk", sans-serif;
   font-size: 32px;
   line-height: 40px;
+  margin-top:20px;
   margin-bottom: 20px;
-
   font-weight: 400;
 }
 
@@ -398,8 +398,7 @@ h6 {
 
 textarea {
   width: 100%;
-  border: 0px;
-  padding: 20px;
+  padding: 12px;
   background-color: #fff;
   border: 1px solid #000;
 }
