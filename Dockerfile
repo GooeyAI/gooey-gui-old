@@ -12,4 +12,4 @@ RUN npm run build
 
 ENV NODE_ENV=production
 
-CMD ./scripts/run-prod.sh
+ENTRYPOINT ./scripts/run-prod.sh
