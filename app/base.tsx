@@ -1,12 +1,20 @@
+import type { LinksFunction } from "@remix-run/node";
 import type { ReactNode } from "react";
+
 import React, { useEffect, useRef, useState } from "react";
 import { JsonViewer } from "@textea/json-viewer";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import "react-tabs/style/react-tabs.css";
-import { marked } from "marked";
 import Select from "react-select";
 import { Link } from "@remix-run/react";
-import { ClientJsFix } from "~/clientJsFix";
+import { GooeyFileInput, links as fileInputLinks } from "~/gooeyFileInput";
+import { RenderedMarkdown } from "~/renderedMarkdown";
+import { ClientOnly } from "remix-utils";
+
+import reactTabsStyle from "react-tabs/style/react-tabs.css";
+
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: reactTabsStyle }, ...fileInputLinks()];
+};
 
 type TreeNode = {
   name: string;
@@ -35,6 +43,28 @@ export function getTransforms({
     ret = { ...ret, ...getTransforms({ children }) };
   }
   return ret;
+}
+
+export const applyTransform: Record<string, (val: FormDataEntryValue) => any> =
+  {
+    checkbox: Boolean,
+    number: parseIntFloat,
+    range: parseIntFloat,
+    select: (val) => (val ? JSON.parse(`${val}`) : null),
+    file: (val) => (val ? JSON.parse(`${val}`) : null),
+  };
+
+function parseIntFloat(val: FormDataEntryValue): number {
+  let strVal = val.toString();
+  const intVal = parseInt(strVal);
+  const floatVal = parseFloat(strVal);
+  if (floatVal == intVal) {
+    return intVal;
+  } else if (isNaN(floatVal)) {
+    return 0;
+  } else {
+    return floatVal;
+  }
 }
 
 export function RenderedChildren({
@@ -81,28 +111,32 @@ function SelectElement({
             : undefined
         }
       />
-      <ClientJsFix>
-        <Select
-          {...props}
-          name={undefined}
-          // delimiter=","
-          isMulti={props.isMulti}
-          onChange={(newValue: any) => {
-            const el = inputRef.current;
-            if (!el) return;
-            if (newValue === undefined) {
-              el.value = "";
-            } else if (!newValue) {
-              el.value = JSON.stringify(newValue);
-            } else if (props.isMulti) {
-              el.value = JSON.stringify(newValue.map((opt: any) => opt.value));
-            } else {
-              el.value = JSON.stringify(newValue.value);
-            }
-            onChange();
-          }}
-        />
-      </ClientJsFix>
+      <ClientOnly>
+        {() => (
+          <Select
+            {...props}
+            name={undefined}
+            // delimiter=","
+            isMulti={props.isMulti}
+            onChange={(newValue: any) => {
+              const el = inputRef.current;
+              if (!el) return;
+              if (newValue === undefined) {
+                el.value = "";
+              } else if (!newValue) {
+                el.value = JSON.stringify(newValue);
+              } else if (props.isMulti) {
+                el.value = JSON.stringify(
+                  newValue.map((opt: any) => opt.value)
+                );
+              } else {
+                el.value = JSON.stringify(newValue.value);
+              }
+              onChange();
+            }}
+          />
+        )}
+      </ClientOnly>
     </div>
   );
 }
@@ -196,6 +230,7 @@ function RenderedTreeNode({
         <>
           <RenderedMarkdown body={props.caption} />
           <img
+            className="gui-img"
             style={style}
             src={props.src}
             alt={props.caption}
@@ -210,14 +245,24 @@ function RenderedTreeNode({
       return (
         <>
           <RenderedMarkdown body={props.caption} />
-          <video style={style} controls src={props.src}></video>
+          <video
+            className="gui-video"
+            style={style}
+            controls
+            src={props.src}
+          ></video>
         </>
       );
     case "audio":
       return (
         <>
           <RenderedMarkdown body={props.caption} />
-          <audio style={style} controls src={props.src}></audio>
+          <audio
+            className="gui-audio"
+            style={style}
+            controls
+            src={props.src}
+          ></audio>
         </>
       );
     case "html":
@@ -247,6 +292,23 @@ function RenderedTreeNode({
         </div>
       );
     case "input":
+      if (props.type === "file") {
+        return (
+          <ClientOnly>
+            {() => (
+              <GooeyFileInput
+                name={props.name}
+                multiple={props.multiple}
+                label={props.label}
+                accept={props.accept}
+                onChange={onChange}
+                defaultValue={props.defaultValue}
+                {...props}
+              />
+            )}
+          </ClientOnly>
+        );
+      }
       return (
         <div className="gooeyInputOrTextArea">
           <label>
@@ -271,17 +333,19 @@ function RenderedTreeNode({
       );
     case "json":
       return (
-        <ClientJsFix>
-          <JsonViewer
-            style={{
-              overflow: "scroll",
-              marginTop: "1rem",
-            }}
-            value={props.value}
-            defaultInspectDepth={props.defaultInspectDepth}
-            rootName={false}
-          ></JsonViewer>
-        </ClientJsFix>
+        <ClientOnly>
+          {() => (
+            <JsonViewer
+              style={{
+                overflow: "scroll",
+                marginTop: "1rem",
+              }}
+              value={props.value}
+              defaultInspectDepth={props.defaultInspectDepth}
+              rootName={false}
+            ></JsonViewer>
+          )}
+        </ClientOnly>
       );
     case "table":
       return (
@@ -369,32 +433,5 @@ export function Details({
         {children}
       </div>
     </div>
-  );
-}
-
-function RenderedMarkdown({
-  body,
-  // allowUnsafeHTML,
-  style,
-}: {
-  body: string;
-  // allowUnsafeHTML?: boolean;
-  style?: Record<string, string>;
-}) {
-  if (!body) return <></>;
-  let html = marked.parse(body, {
-    gfm: true,
-    headerIds: false,
-    mangle: false,
-  });
-  // if (!allowUnsafeHTML) {
-  //   html = sanitizeHtml(html);
-  // }
-  return (
-    <span
-      className="htmlContainer"
-      dangerouslySetInnerHTML={{ __html: html }}
-      style={style}
-    ></span>
   );
 }

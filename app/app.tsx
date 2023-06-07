@@ -10,7 +10,7 @@ import {
   useSearchParams,
   useSubmit,
 } from "@remix-run/react";
-import { getTransforms, RenderedChildren } from "~/base";
+import { applyTransform, getTransforms, RenderedChildren } from "~/base";
 import type { ActionArgs, LinksFunction, LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import type { FormEvent } from "react";
@@ -20,40 +20,17 @@ import path from "path";
 import { handleRedirectResponse } from "~/handleRedirect";
 import { useEventSourceNullOk } from "~/event-source";
 import { useDebouncedCallback } from "use-debounce";
-import custom from "~/styles/custom.css";
-import app from "~/styles/app.css";
+
+import customStyles from "~/styles/custom.css";
+import appStyles from "~/styles/app.css";
+import { links as baseLinks } from "~/base";
 
 export const meta: V2_MetaFunction = ({ data }) => {
   return data.meta ?? [];
 };
 
 export const links: LinksFunction = () => {
-  //   const old = `
-  //       <link
-  //       href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
-  //       rel="stylesheet"
-  //       integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
-  //       crossorigin="anonymous"
-  //     />
-  //     <script
-  //       src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-  //       integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-  //       crossorigin="anonymous"
-  //     ></script>
-  //     <link rel="preconnect" href="https://fonts.googleapis.com" />
-  //     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  //     <link
-  //       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
-  //       rel="stylesheet"
-  //     />
-  //     <link href="custome.css" rel="stylesheet" />
-  // `;
-
   return [
-    // {
-    //   rel: "stylesheet",
-    //   href: "https://unpkg.com/modern-css-reset@1.4.0/dist/reset.min.css",
-    // },
     {
       rel: "stylesheet",
       href: "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
@@ -61,8 +38,9 @@ export const links: LinksFunction = () => {
         "sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65",
       crossOrigin: "anonymous",
     },
-    { rel: "stylesheet", href: custom },
-    { rel: "stylesheet", href: app },
+    ...baseLinks(),
+    { rel: "stylesheet", href: customStyles },
+    { rel: "stylesheet", href: appStyles },
   ];
 };
 
@@ -86,7 +64,7 @@ export async function action({ params, request }: ActionArgs) {
   } & Record<string, any> = JSON.parse(__gooey_gui_request_body.toString());
   // apply transforms
   for (let [field, inputType] of Object.entries(transforms)) {
-    let toJson = formFieldToJson[inputType];
+    let toJson = applyTransform[inputType];
     if (!toJson) continue;
     inputs[field] = toJson(inputs[field]);
   }
@@ -130,26 +108,6 @@ async function callServer({
 
   if (!response.ok) throw response;
   return response;
-}
-
-const formFieldToJson: Record<string, (val: FormDataEntryValue) => any> = {
-  checkbox: Boolean,
-  number: parseIntFloat,
-  range: parseIntFloat,
-  select: (val) => (val ? JSON.parse(`${val}`) : null),
-};
-
-function parseIntFloat(val: FormDataEntryValue): number {
-  let strVal = val.toString();
-  const intVal = parseInt(strVal);
-  const floatVal = parseFloat(strVal);
-  if (floatVal == intVal) {
-    return intVal;
-  } else if (isNaN(floatVal)) {
-    return 0;
-  } else {
-    return floatVal;
-  }
 }
 
 export const shouldRevalidate: ShouldRevalidateFunction = (args) => {

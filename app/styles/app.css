@@ -1,13 +1,13 @@
-img {
+.gui-img {
   width: 100%;
   height: auto;
 }
 
-audio {
+.gui-audio {
   width: 100%;
 }
 
-video {
+.gui-video {
   width: 100%;
   height: auto;
 }
