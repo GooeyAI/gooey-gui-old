@@ -12,5 +12,4 @@ RUN npm run build
 
 ENV NODE_ENV=production
 
-CMD echo $GOOGLE_APPLICATION_CREDENTIALS_JSON > serviceAccountKey.json \
-    && GOOGLE_APPLICATION_CREDENTIALS=serviceAccountKey.json npm run start
+CMD ./scripts/run-prod.sh
