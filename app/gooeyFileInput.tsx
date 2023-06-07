@@ -93,9 +93,11 @@ export function GooeyFileInput({
         });
       } catch (e) {}
     }
-    uppy.setState({
-      totalProgress: 100,
-    });
+    if (uppy.getFiles().length) {
+      uppy.setState({
+        totalProgress: 100,
+      });
+    }
     // only set this after initial files have been added
     uppy.setOptions({
       autoProceed: true,
