@@ -174,14 +174,12 @@ export default function App() {
         onChange={handleChange}
         noValidate
       >
-        <div className="container mt-5 gooeyOuterDiv">
-          <RenderedChildren
-            children={children}
-            onChange={() => {
-              if (formRef.current) submit(formRef.current);
-            }}
-          />
-        </div>
+        <RenderedChildren
+          children={children}
+          onChange={() => {
+            if (formRef.current) submit(formRef.current);
+          }}
+        />
         <input
           type="hidden"
           name="__gooey_gui_request_body"

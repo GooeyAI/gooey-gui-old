@@ -20,7 +20,6 @@ type TreeNode = {
   name: string;
   props: Record<string, any>;
   children: Array<TreeNode>;
-  style: Record<string, string>;
 };
 
 export function getTransforms({
@@ -67,6 +66,244 @@ function parseIntFloat(val: FormDataEntryValue): number {
   }
 }
 
+function RenderedTreeNode({
+  node,
+  onChange,
+}: {
+  node: TreeNode;
+  onChange: () => void;
+}) {
+  const { name, props, children } = node;
+  switch (name) {
+    case "":
+      return <RenderedChildren children={children} onChange={onChange} />;
+    case "nav-tab-content":
+      return (
+        <div className="tab-content">
+          <div className="tab-pane show active" role="tabpanel">
+            <RenderedChildren children={children} onChange={onChange} />
+          </div>
+        </div>
+      );
+
+    case "nav-tabs":
+      return (
+        <ul className="nav nav-tabs" role="tablist" {...props}>
+          <RenderedChildren children={children} onChange={onChange} />
+        </ul>
+      );
+    case "nav-item":
+      return (
+        <Link to={props.to} {...props}>
+          <li className="nav-item" role="presentation">
+            <button
+              className={`nav-link ${props.active ? "active" : ""}`}
+              type="button"
+              role="tab"
+              aria-controls="run"
+              aria-selected="true"
+            >
+              <p className="mb-0">
+                <RenderedChildren children={children} onChange={onChange} />
+              </p>
+            </button>
+          </li>
+        </Link>
+      );
+    case "pre":
+      return <pre {...props}>{props.body}</pre>;
+    case "ul":
+      return (
+        <ul {...props}>
+          <RenderedChildren children={children} onChange={onChange} />
+        </ul>
+      );
+    case "div":
+      return (
+        <div {...props}>
+          <RenderedChildren children={children} onChange={onChange} />
+        </div>
+      );
+    case "tabs":
+      let tabs = children.map((elem) => (
+        <Tab key={elem.props.label}>
+          <RenderedMarkdown body={elem.props.label} />
+        </Tab>
+      ));
+      let panels = children.map((elem) => (
+        <TabPanel key={elem.props.label} {...elem.props}>
+          <RenderedChildren children={elem.children} onChange={onChange} />
+        </TabPanel>
+      ));
+      return (
+        <Tabs {...props}>
+          <TabList>{tabs}</TabList>
+          {panels}
+        </Tabs>
+      );
+    case "details":
+      return (
+        <Details
+          open={props.open}
+          summary={<RenderedMarkdown body={props.label} {...props} />}
+        >
+          <RenderedChildren children={children} onChange={onChange} />
+        </Details>
+      );
+    case "img":
+      return (
+        <>
+          <RenderedMarkdown body={props.caption} />
+          <img
+            className="gui-img"
+            alt={props.caption}
+            {...props}
+            onClick={() => {
+              if (props.src.startsWith("data:")) return;
+              window.open(props.src);
+            }}
+          />
+        </>
+      );
+    case "video":
+      return (
+        <>
+          <RenderedMarkdown body={props.caption} />
+          <video className="gui-video" controls {...props}></video>
+        </>
+      );
+    case "audio":
+      return (
+        <>
+          <RenderedMarkdown body={props.caption} />
+          <audio className="gui-audio" controls {...props}></audio>
+        </>
+      );
+    case "html":
+      return (
+        <span
+          className="htmlContainer"
+          dangerouslySetInnerHTML={{
+            __html: props.body,
+          }}
+          {...props}
+        ></span>
+      );
+    case "markdown":
+      return <RenderedMarkdown body={props.body} {...props} />;
+    case "textarea":
+      return (
+        <div className="gooeyInputOrTextArea">
+          <RenderedMarkdown body={props.label} />
+          <div>
+            <textarea {...props} />
+          </div>
+        </div>
+      );
+    case "input":
+      if (props.type === "file") {
+        return (
+          <ClientOnly>
+            {() => (
+              <GooeyFileInput
+                name={props.name}
+                multiple={props.multiple}
+                label={props.label}
+                accept={props.accept}
+                onChange={onChange}
+                defaultValue={props.defaultValue}
+                {...props}
+              />
+            )}
+          </ClientOnly>
+        );
+      }
+      return (
+        <div className="gooeyInputOrTextArea">
+          <label>
+            <RenderedMarkdown body={props.label} />
+          </label>
+          <input {...props} />
+        </div>
+      );
+    case "gui-button":
+      return (
+        <button type="button" className={"btn btn-theme"} {...props}>
+          <RenderedMarkdown body={props.label} />
+        </button>
+      );
+    case "select":
+      return <GuiSelect props={props} onChange={onChange} />;
+    case "option":
+      return (
+        <option {...props}>
+          <RenderedMarkdown body={props.label} />
+        </option>
+      );
+    case "json":
+      return (
+        <ClientOnly>
+          {() => (
+            <JsonViewer
+              style={{
+                overflow: "scroll",
+                marginTop: "1rem",
+              }}
+              value={props.value}
+              defaultInspectDepth={props.defaultInspectDepth}
+              rootName={false}
+            ></JsonViewer>
+          )}
+        </ClientOnly>
+      );
+    case "table":
+      return (
+        <table>
+          {<RenderedChildren children={children} onChange={onChange} />}
+        </table>
+      );
+    case "thead":
+      return (
+        <thead>
+          {<RenderedChildren children={children} onChange={onChange} />}
+        </thead>
+      );
+    case "tbody":
+      return (
+        <tbody>
+          {<RenderedChildren children={children} onChange={onChange} />}
+        </tbody>
+      );
+    case "tr":
+      return (
+        <tr>{<RenderedChildren children={children} onChange={onChange} />}</tr>
+      );
+    case "th":
+      return (
+        <th>{<RenderedChildren children={children} onChange={onChange} />}</th>
+      );
+    case "td":
+      return (
+        <td>{<RenderedChildren children={children} onChange={onChange} />}</td>
+      );
+    default:
+      const CustomTag = name;
+      return (
+        // @ts-ignore
+        <CustomTag {...props}>
+          <RenderedChildren children={children} onChange={onChange} />
+        </CustomTag>
+      );
+    // return (
+    //   <div>
+    //     <pre>
+    //       <code>{JSON.stringify(node)}</code>
+    //     </pre>
+    //   </div>
+    // );
+  }
+}
+
 export function RenderedChildren({
   children,
   onChange,
@@ -86,7 +323,7 @@ export function RenderedChildren({
   return <>{elements}</>;
 }
 
-function SelectElement({
+function GuiSelect({
   props,
   onChange,
 }: {
@@ -141,253 +378,6 @@ function SelectElement({
   );
 }
 
-function RenderedTreeNode({
-  node,
-  onChange,
-}: {
-  node: TreeNode;
-  onChange: () => void;
-}) {
-  const { name, props, children, style } = node;
-  switch (name) {
-    case "":
-      return <RenderedChildren children={children} onChange={onChange} />;
-    case "nav-tab-content":
-      return (
-        <div className="tab-content">
-          <div className="tab-pane show active" role="tabpanel">
-            <RenderedChildren children={children} onChange={onChange} />
-          </div>
-        </div>
-      );
-
-    case "nav-tabs":
-      return (
-        <ul className="nav nav-tabs" role="tablist" style={style} {...props}>
-          <RenderedChildren children={children} onChange={onChange} />
-        </ul>
-      );
-    case "nav-item":
-      return (
-        <Link to={props.href} {...props.attrs}>
-          <li className="nav-item" role="presentation">
-            <button
-              className={`nav-link ${props.active ? "active" : ""}`}
-              type="button"
-              role="tab"
-              aria-controls="run"
-              aria-selected="true"
-            >
-              <p className="mb-0">
-                <RenderedChildren children={children} onChange={onChange} />
-              </p>
-            </button>
-          </li>
-        </Link>
-      );
-    case "pre":
-      return <pre style={style}>{props.body}</pre>;
-    case "ul":
-      return (
-        <ul style={style} {...props}>
-          <RenderedChildren children={children} onChange={onChange} />
-        </ul>
-      );
-    case "div":
-      return (
-        <div style={style} {...props}>
-          <RenderedChildren children={children} onChange={onChange} />
-        </div>
-      );
-    case "tabs":
-      let tabs = children.map((elem) => (
-        <Tab key={elem.props.label}>
-          <RenderedMarkdown body={elem.props.label} />
-        </Tab>
-      ));
-      let panels = children.map((elem) => (
-        <TabPanel key={elem.props.label} style={elem.style}>
-          <RenderedChildren children={elem.children} onChange={onChange} />
-        </TabPanel>
-      ));
-      return (
-        <Tabs style={style}>
-          <TabList>{tabs}</TabList>
-          {panels}
-        </Tabs>
-      );
-    case "details":
-      return (
-            <Details
-              open={props.open}
-              summary={<RenderedMarkdown body={props.label} />}
-            >
-              <RenderedChildren children={children} onChange={onChange} />
-            </Details>
-      );
-    case "img":
-      return (
-        <>
-          <RenderedMarkdown body={props.caption} />
-          <img
-            className="gui-img"
-            style={style}
-            src={props.src}
-            alt={props.caption}
-            onClick={() => {
-              if (props.src.startsWith("data:")) return;
-              window.open(props.src);
-            }}
-          />
-        </>
-      );
-    case "video":
-      return (
-        <>
-          <RenderedMarkdown body={props.caption} />
-          <video
-            className="gui-video"
-            style={style}
-            controls
-            src={props.src}
-          ></video>
-        </>
-      );
-    case "audio":
-      return (
-        <>
-          <RenderedMarkdown body={props.caption} />
-          <audio
-            className="gui-audio"
-            style={style}
-            controls
-            src={props.src}
-          ></audio>
-        </>
-      );
-    case "html":
-      return (
-        <span
-          className="htmlContainer"
-          style={style}
-          dangerouslySetInnerHTML={{
-            __html: props.body,
-          }}
-        ></span>
-      );
-    case "markdown":
-      return (
-        <RenderedMarkdown
-          body={props.body}
-          // allowUnsafeHTML={props.unsafe_allow_html || false}
-        />
-      );
-    case "textarea":
-      return (
-        <div className="gooeyInputOrTextArea">
-          <RenderedMarkdown body={props.label} />
-          <div>
-            <textarea style={style} {...props} />
-          </div>
-        </div>
-      );
-    case "input":
-      if (props.type === "file") {
-        return (
-          <ClientOnly>
-            {() => (
-              <GooeyFileInput
-                name={props.name}
-                multiple={props.multiple}
-                label={props.label}
-                accept={props.accept}
-                onChange={onChange}
-                defaultValue={props.defaultValue}
-                {...props}
-              />
-            )}
-          </ClientOnly>
-        );
-      }
-      return (
-        <div className="gooeyInputOrTextArea">
-          <label>
-            <RenderedMarkdown body={props.label} />
-          </label>
-          <input {...props} />
-        </div>
-      );
-    case "button":
-          return (
-            <button type="button" className={"btn btn-theme"}  {...props}>
-              <RenderedMarkdown body={props.label} />
-            </button>
-          );
-    case "select":
-      return <SelectElement props={props} onChange={onChange} />;
-    case "option":
-      return (
-        <option style={style} {...props}>
-          <RenderedMarkdown body={props.label} />
-        </option>
-      );
-    case "json":
-      return (
-        <ClientOnly>
-          {() => (
-            <JsonViewer
-              style={{
-                overflow: "scroll",
-                marginTop: "1rem",
-              }}
-              value={props.value}
-              defaultInspectDepth={props.defaultInspectDepth}
-              rootName={false}
-            ></JsonViewer>
-          )}
-        </ClientOnly>
-      );
-    case "table":
-      return (
-        <table>
-          {<RenderedChildren children={children} onChange={onChange} />}
-        </table>
-      );
-    case "thead":
-      return (
-        <thead>
-          {<RenderedChildren children={children} onChange={onChange} />}
-        </thead>
-      );
-    case "tbody":
-      return (
-        <tbody>
-          {<RenderedChildren children={children} onChange={onChange} />}
-        </tbody>
-      );
-    case "tr":
-      return (
-        <tr>{<RenderedChildren children={children} onChange={onChange} />}</tr>
-      );
-    case "th":
-      return (
-        <th>{<RenderedChildren children={children} onChange={onChange} />}</th>
-      );
-    case "td":
-      return (
-        <td>{<RenderedChildren children={children} onChange={onChange} />}</td>
-      );
-    default:
-      return (
-        <div>
-          <pre>
-            <code>{JSON.stringify(node)}</code>
-          </pre>
-        </div>
-      );
-  }
-}
-
 export function Details({
   open,
   summary,
@@ -408,24 +398,24 @@ export function Details({
   }, [isOpen]);
 
   return (
-    <div className="gooeyDetails" >
+    <div className="gooeyDetails">
       <input hidden={true} type="checkbox" ref={ref} name={"magic"} />
-      <div className="gooeyDetailsHeader"
+      <div
+        className="gooeyDetailsHeader"
         onClick={() => {
           ref.current!.checked = !isOpen;
           setIsOpen(!isOpen);
         }}
         style={{
           userSelect: "none",
-          backgroundColor: isOpen ? "#f2f2f2" :"initial",
+          backgroundColor: isOpen ? "#f2f2f2" : "initial",
         }}
       >
-          <div style={{float: "right"}}>
-                {isOpen ? "⌄" : "⌃"}
-          </div>
+        <div style={{ float: "right" }}>{isOpen ? "⌄" : "⌃"}</div>
         {summary}
       </div>
-      <div className="gooeyDetailsBody"
+      <div
+        className="gooeyDetailsBody"
         style={{
           display: isOpen ? "block" : "none",
         }}

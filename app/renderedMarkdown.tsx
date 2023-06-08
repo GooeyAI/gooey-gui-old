@@ -3,12 +3,12 @@ import { marked } from "marked";
 
 export function RenderedMarkdown({
   body,
-  // allowUnsafeHTML,
-  style,
-}: {
+  ...props
+}: // allowUnsafeHTML,
+{
   body: string;
+  props?: Record<string, any>[];
   // allowUnsafeHTML?: boolean;
-  style?: Record<string, string>;
 }) {
   if (!body) return <></>;
   let html = marked.parse(body, {
@@ -21,9 +21,9 @@ export function RenderedMarkdown({
   // }
   return (
     <span
-      className="htmlContainer"
+      className="htmlContainer mdContainer"
       dangerouslySetInnerHTML={{ __html: html }}
-      style={style}
+      {...props}
     ></span>
   );
 }
