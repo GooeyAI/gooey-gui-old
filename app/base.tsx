@@ -217,15 +217,33 @@ function RenderedTreeNode({
             )}
           </ClientOnly>
         );
-      }
-      return (
-        <div className="gooeyInputOrTextArea">
-          <label>
-            <RenderedMarkdown body={props.label} />
-          </label>
-          <input {...props} />
-        </div>
-      );
+      } else if (props.type === "checkbox") {
+        return (
+            <div className="form-check">
+              <input className="form-check-input" id={props.name} {...props} />
+              <label className="form-check-label" htmlFor={props.name}>
+                <RenderedMarkdown body={props.label} />
+              </label>
+            </div>
+          );
+      } else if (props.type === "radio") {
+        return (
+            <div className="form-check">
+              <input className="form-check-input" id={props.value} {...props} />
+              <label className="form-check-label" htmlFor={props.value}  >
+                <RenderedMarkdown body={props.label} />
+              </label>
+            </div>
+          );
+      } else
+          return (
+            <div className={props.type}>
+              <label>
+                <RenderedMarkdown body={props.label} />
+              </label>
+              <input {...props} />
+            </div>
+          );
     case "gui-button":
       return (
         <button type="button" className={"btn btn-theme"} {...props}>
