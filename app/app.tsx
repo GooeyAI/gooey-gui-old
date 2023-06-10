@@ -1,3 +1,6 @@
+import type { FormEvent } from "react";
+import React, { useEffect, useRef } from "react";
+
 import type {
   ShouldRevalidateFunction,
   V2_MetaFunction,
@@ -10,11 +13,14 @@ import {
   useSearchParams,
   useSubmit,
 } from "@remix-run/react";
-import { applyTransform, getTransforms, RenderedChildren } from "~/base";
+import {
+  applyTransform,
+  getTransforms,
+  links as baseLinks,
+  RenderedChildren,
+} from "~/base";
 import type { ActionArgs, LinksFunction, LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import type { FormEvent } from "react";
-import React, { useEffect, useRef } from "react";
 import process from "process";
 import path from "path";
 import { handleRedirectResponse } from "~/handleRedirect";
@@ -23,7 +29,6 @@ import { useDebouncedCallback } from "use-debounce";
 
 import customStyles from "~/styles/custom.css";
 import appStyles from "~/styles/app.css";
-import { links as baseLinks } from "~/base";
 
 export const meta: V2_MetaFunction = ({ data }) => {
   return data.meta ?? [];

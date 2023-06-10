@@ -1,16 +1,14 @@
-import type { LinksFunction } from "@remix-run/node";
-import type { ReactNode } from "react";
-
-import React, { useEffect, useRef, useState } from "react";
-import { JsonViewer } from "@textea/json-viewer";
-import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
+import type {LinksFunction} from "@remix-run/node";
+import type {ReactNode} from "react";
+import React, {useEffect} from "react";
+import {Tab, TabList, TabPanel, Tabs} from "react-tabs";
 import Select from "react-select";
-import { Link } from "@remix-run/react";
-import { GooeyFileInput, links as fileInputLinks } from "~/gooeyFileInput";
-import { RenderedMarkdown } from "~/renderedMarkdown";
-import { ClientOnly } from "remix-utils";
+import {GooeyFileInput, links as fileInputLinks} from "~/gooeyFileInput";
+import {RenderedMarkdown} from "~/renderedMarkdown";
 
 import reactTabsStyle from "react-tabs/style/react-tabs.css";
+import {useJsonFormInput} from "~/jsonFormInput";
+import {JsonViewer} from "@textea/json-viewer";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: reactTabsStyle }, ...fileInputLinks()];
@@ -85,19 +83,19 @@ function RenderedTreeNode({
           </div>
         </div>
       );
-
     case "nav-tabs":
       return (
         <ul className="nav nav-tabs" role="tablist" {...props}>
           <RenderedChildren children={children} onChange={onChange} />
         </ul>
       );
-    case "nav-item":
+    case "nav-item": {
+      const { to, active, ...args } = props;
       return (
-        <Link to={props.to} {...props}>
+        <a href={to} {...args}>
           <li className="nav-item" role="presentation">
             <button
-              className={`nav-link ${props.active ? "active" : ""}`}
+              className={`nav-link ${active ? "active" : ""}`}
               type="button"
               role="tab"
               aria-controls="run"
@@ -108,29 +106,34 @@ function RenderedTreeNode({
               </p>
             </button>
           </li>
-        </Link>
+        </a>
       );
-    case "pre":
-      return <pre {...props}>{props.body}</pre>;
-    case "ul":
+    }
+    case "pre": {
+      const { body, ...args } = props;
+      return <pre {...args}>{body}</pre>;
+    }
+    case "ul": {
       return (
         <ul {...props}>
           <RenderedChildren children={children} onChange={onChange} />
         </ul>
       );
-    case "div":
+    }
+    case "div": {
       return (
         <div {...props}>
           <RenderedChildren children={children} onChange={onChange} />
         </div>
       );
+    }
     case "tabs":
-      let tabs = children.map((elem) => (
+      const tabs = children.map((elem) => (
         <Tab key={elem.props.label}>
           <RenderedMarkdown body={elem.props.label} />
         </Tab>
       ));
-      let panels = children.map((elem) => (
+      const panels = children.map((elem) => (
         <TabPanel key={elem.props.label} {...elem.props}>
           <RenderedChildren children={elem.children} onChange={onChange} />
         </TabPanel>
@@ -141,138 +144,142 @@ function RenderedTreeNode({
           {panels}
         </Tabs>
       );
-    case "details":
+    case "expander": {
+      const { label, open, ...args } = props;
       return (
-        <Details
-          open={props.open}
-          summary={<RenderedMarkdown body={props.label} {...props} />}
-        >
+        <GuiExpander open={open} label={label} {...args}>
           <RenderedChildren children={children} onChange={onChange} />
-        </Details>
+        </GuiExpander>
       );
-    case "img":
+    }
+    case "img": {
+      const { caption, ...args } = props;
       return (
         <>
-          <RenderedMarkdown body={props.caption} />
+          <RenderedMarkdown body={caption} />
           <img
             className="gui-img"
-            alt={props.caption}
-            {...props}
+            alt={caption}
+            {...args}
             onClick={() => {
-              if (props.src.startsWith("data:")) return;
-              window.open(props.src);
+              if (args.src.startsWith("data:")) return;
+              window.open(args.src);
             }}
           />
         </>
       );
-    case "video":
+    }
+    case "video": {
+      const { caption, ...args } = props;
       return (
         <>
-          <RenderedMarkdown body={props.caption} />
-          <video className="gui-video" controls {...props}></video>
+          <RenderedMarkdown body={caption} />
+          <video className="gui-video" controls {...args}></video>
         </>
       );
-    case "audio":
+    }
+    case "audio": {
+      const { caption, ...args } = props;
       return (
         <>
-          <RenderedMarkdown body={props.caption} />
-          <audio className="gui-audio" controls {...props}></audio>
+          <RenderedMarkdown body={caption} />
+          <audio className="gui-audio" controls {...args}></audio>
         </>
       );
-    case "html":
+    }
+    case "html": {
+      const { body, ...args } = props;
+      return <span dangerouslySetInnerHTML={{ __html: body }} {...args} />;
+    }
+    case "markdown": {
+      const { body, ...args } = props;
+      return <RenderedMarkdown body={body} {...args} />;
+    }
+    case "textarea": {
+      const { label, ...args } = props;
       return (
-        <span
-          className="htmlContainer"
-          dangerouslySetInnerHTML={{
-            __html: props.body,
-          }}
-          {...props}
-        ></span>
-      );
-    case "markdown":
-      return <RenderedMarkdown body={props.body} {...props} />;
-    case "textarea":
-      return (
-        <div className="gooeyInputOrTextArea">
-          <RenderedMarkdown body={props.label} />
+        <div className="gui-input gui-input-textarea">
+          <RenderedMarkdown body={label} />
           <div>
-            <textarea {...props} />
+            <textarea {...args} />
           </div>
         </div>
       );
-    case "input":
-      if (props.type === "file") {
-        return (
-          <ClientOnly>
-            {() => (
-              <GooeyFileInput
-                name={props.name}
-                multiple={props.multiple}
-                label={props.label}
-                accept={props.accept}
-                onChange={onChange}
-                defaultValue={props.defaultValue}
-                {...props}
-              />
-            )}
-          </ClientOnly>
-        );
-      } else if (props.type === "checkbox") {
-        return (
-            <div className="form-check">
-              <input className="form-check-input" id={props.name} {...props} />
-              <label className="form-check-label" htmlFor={props.name}>
-                <RenderedMarkdown body={props.label} />
-              </label>
-            </div>
-          );
-      } else if (props.type === "radio") {
-        return (
-            <div className="form-check">
-              <input className="form-check-input" id={props.value} {...props} />
-              <label className="form-check-label" htmlFor={props.value}  >
-                <RenderedMarkdown body={props.label} />
-              </label>
-            </div>
-          );
-      } else
+    }
+    case "input": {
+      const className = `gui-input gui-input-${props.type}`;
+      const id = inputId(props);
+      switch (props.type) {
+        case "file": {
+          const { name, multiple, label, accept, defaultValue, ...args } =
+            props;
           return (
-            <div className={props.type}>
-              <label>
-                <RenderedMarkdown body={props.label} />
+            <GooeyFileInput
+              name={name}
+              multiple={multiple}
+              label={label}
+              accept={accept}
+              onChange={onChange}
+              defaultValue={defaultValue}
+              {...args}
+            />
+          );
+        }
+        case "checkbox":
+        case "radio": {
+          const { label, ...args } = props;
+          return (
+            <div className={className}>
+              <input id={id} {...args} />
+              <label htmlFor={id}>
+                <RenderedMarkdown body={label} />
               </label>
-              <input {...props} />
             </div>
           );
-    case "gui-button":
+        }
+        default: {
+          const { label, ...args } = props;
+          return (
+            <div className={className}>
+              <label htmlFor={id}>
+                <RenderedMarkdown body={label} />
+              </label>
+              <input id={id} {...args} />
+            </div>
+          );
+        }
+      }
+    }
+    case "gui-button": {
+      const { label, ...args } = props;
       return (
-        <button type="button" className={"btn btn-theme"} {...props}>
-          <RenderedMarkdown body={props.label} />
+        <button type="button" className={"btn btn-theme"} {...args}>
+          <RenderedMarkdown body={label} />
         </button>
       );
+    }
     case "select":
       return <GuiSelect props={props} onChange={onChange} />;
-    case "option":
+    case "option": {
+      const { label, ...args } = props;
       return (
-        <option {...props}>
-          <RenderedMarkdown body={props.label} />
+        <option {...args}>
+          <RenderedMarkdown body={label} />
         </option>
       );
+    }
     case "json":
       return (
-        <ClientOnly>
-          {() => (
-            <JsonViewer
-              style={{
-                overflow: "scroll",
-                marginTop: "1rem",
-              }}
-              value={props.value}
-              defaultInspectDepth={props.defaultInspectDepth}
-              rootName={false}
-            ></JsonViewer>
-          )}
-        </ClientOnly>
+        <JsonViewer
+          style={{
+            overflow: "scroll",
+            marginTop: "1rem",
+          }}
+          rootName={false}
+          value={props.value}
+          defaultInspectDepth={props.defaultInspectDepth}
+          {...props}
+        />
       );
     case "table":
       return (
@@ -304,21 +311,28 @@ function RenderedTreeNode({
       return (
         <td>{<RenderedChildren children={children} onChange={onChange} />}</td>
       );
-    default:
-      const CustomTag = name;
+    case "Link":
       return (
-        // @ts-ignore
-        <CustomTag {...props}>
+        <a href={props.to} {...props}>
           <RenderedChildren children={children} onChange={onChange} />
-        </CustomTag>
+        </a>
       );
-    // return (
-    //   <div>
-    //     <pre>
-    //       <code>{JSON.stringify(node)}</code>
-    //     </pre>
-    //   </div>
-    // );
+    case "tag": {
+      const { __reactjsxelement, ...args } = props;
+      return (
+        <__reactjsxelement {...args}>
+          <RenderedChildren children={children} onChange={onChange} />
+        </__reactjsxelement>
+      );
+    }
+    default:
+      return (
+        <div>
+          <pre>
+            <code>{JSON.stringify(node)}</code>
+          </pre>
+        </div>
+      );
   }
 }
 
@@ -332,7 +346,7 @@ export function RenderedChildren({
   let elements = children.map((node, idx) => {
     let key;
     if (node.props.name) {
-      key = `input:${node.props.name}:${node.props.value}`;
+      key = inputId(node.props);
     } else {
       key = `idx:${idx}`;
     }
@@ -348,98 +362,85 @@ function GuiSelect({
   props: Record<string, any>;
   onChange: () => void;
 }) {
-  let inputRef = useRef<HTMLInputElement>(null);
+  const { defaultValue, name, label, ...args } = props;
+  const [JsonFormInput, value, setValue] = useJsonFormInput({
+    defaultValue,
+    name,
+    onChange,
+  });
+
+  const onSelectChange = (newValue: any) => {
+    if (newValue === undefined) return;
+    if (!newValue) {
+      setValue(newValue);
+    } else if (args.isMulti) {
+      setValue(newValue.map((opt: any) => opt.value));
+    } else {
+      setValue(newValue.value);
+    }
+    onChange();
+  };
+
+  let selectValue = args.options.filter((opt: any) =>
+    args.isMulti ? value.includes(opt.value) : opt.value === value
+  );
+  // if selectedValue is not in options, then set it to the first option
+  useEffect(() => {
+    if (!selectValue.length) {
+      setValue(args.isMulti ? [args.options[0].value] : args.options[0].value);
+    }
+  }, [args.isMulti, args.options, selectValue, setValue]);
+
   return (
-    <div className={"gooeySelect"}>
-      <label htmlFor={props.name}>
-        <RenderedMarkdown body={props.label} />
+    <div className="gui-input gui-input-select">
+      <label htmlFor={name}>
+        <RenderedMarkdown body={label} />
       </label>
-      <input
-        ref={inputRef}
-        type="hidden"
-        name={props.name}
-        value={
-          props.defaultValue
-            ? props.isMulti
-              ? JSON.stringify(props.defaultValue.map((opt: any) => opt.value))
-              : JSON.stringify(props.defaultValue.value)
-            : undefined
-        }
-      />
-      <ClientOnly>
-        {() => (
-          <Select
-            {...props}
-            name={undefined}
-            // delimiter=","
-            isMulti={props.isMulti}
-            onChange={(newValue: any) => {
-              const el = inputRef.current;
-              if (!el) return;
-              if (newValue === undefined) {
-                el.value = "";
-              } else if (!newValue) {
-                el.value = JSON.stringify(newValue);
-              } else if (props.isMulti) {
-                el.value = JSON.stringify(
-                  newValue.map((opt: any) => opt.value)
-                );
-              } else {
-                el.value = JSON.stringify(newValue.value);
-              }
-              onChange();
-            }}
-          />
-        )}
-      </ClientOnly>
+      <JsonFormInput />
+      {/*{JsonFormInput}*/}
+      <Select value={selectValue} onChange={onSelectChange} {...args} />
     </div>
   );
 }
 
-export function Details({
+export function GuiExpander({
   open,
-  summary,
+  label,
   children,
+  ...props
 }: {
   open?: boolean;
-  summary: React.JSX.Element;
+  label: string;
   children: ReactNode;
+  [key: string]: any;
 }) {
-  const [isOpen, setIsOpen] = useState(open);
-  const ref = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    if (ref.current.checked != isOpen) {
-      setIsOpen(ref.current.checked);
-    }
-  }, [isOpen]);
-
+  const [JsonFormInput, isOpen, setIsOpen] = useJsonFormInput({
+    defaultValue: open,
+    name: `gui-expander-${label}`,
+  });
   return (
-    <div className="gooeyDetails">
-      <input hidden={true} type="checkbox" ref={ref} name={"magic"} />
+    <div className="gui-expander accordion">
+      <JsonFormInput />
+      {/*{JsonFormInput}*/}
       <div
-        className="gooeyDetailsHeader"
-        onClick={() => {
-          ref.current!.checked = !isOpen;
-          setIsOpen(!isOpen);
-        }}
-        style={{
-          userSelect: "none",
-          backgroundColor: isOpen ? "#f2f2f2" : "initial",
-        }}
+        className={`gui-expander-header accordion-header accordion-button ${
+          isOpen ? "" : "collapsed"
+        }`}
+        onClick={() => setIsOpen(!isOpen)}
+        {...props}
       >
-        <div style={{ float: "right" }}>{isOpen ? "⌄" : "⌃"}</div>
-        {summary}
+        <RenderedMarkdown body={label} />
       </div>
       <div
-        className="gooeyDetailsBody"
-        style={{
-          display: isOpen ? "block" : "none",
-        }}
+        className="gui-expander-body"
+        style={{ display: isOpen ? "block" : "none" }}
       >
         {children}
       </div>
     </div>
   );
+}
+
+function inputId(props: Record<string, any>) {
+  return `input:${props.name}:${props.value}`;
 }
