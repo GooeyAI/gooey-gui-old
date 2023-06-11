@@ -90,7 +90,7 @@ body {
   text-decoration: none;
 }
 
-.htmlContainer a {
+a {
   color: inherit;
   text-decoration: underline;
   text-decoration-color: rgba(0, 0, 0, 0.45);
@@ -98,7 +98,7 @@ body {
   text-underline-offset: 0.15em;
 }
 
-.htmlContainer a:hover {
+a:hover {
   color: inherit;
   text-decoration-color: black;
   text-decoration-thickness: 2px;

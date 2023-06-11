@@ -2,7 +2,7 @@ import type { LinksFunction } from "@remix-run/node";
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
 import Webcam from "@uppy/webcam";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RenderedMarkdown } from "~/renderedMarkdown";
 import XHR from "@uppy/xhr-upload";
 import Audio from "@uppy/audio";
@@ -37,19 +37,22 @@ export function GooeyFileInput({
   onChange: () => void;
   defaultValue: string | string[] | undefined;
 }) {
+  const [uppy, setUppy] = useState<Uppy | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const onFilesChanged = () => {
-    const element = inputRef.current;
-    if (!element) return;
-    const uploadUrls = uppy
-      .getFiles()
-      .map((file) => file.response?.uploadURL)
-      .filter((url) => url);
-    element.value = JSON.stringify(multiple ? uploadUrls : uploadUrls[0]) || "";
-    onChange();
-  };
-  const [uppy] = useState(() => {
-    const uppy = new Uppy({
+
+  useEffect(() => {
+    const onFilesChanged = () => {
+      const element = inputRef.current;
+      if (!element) return;
+      const uploadUrls = _uppy
+        .getFiles()
+        .map((file) => file.response?.uploadURL)
+        .filter((url) => url);
+      element.value =
+        JSON.stringify(multiple ? uploadUrls : uploadUrls[0]) || "";
+      onChange();
+    };
+    const _uppy: Uppy = new Uppy({
       id: name,
       allowMultipleUploadBatches: true,
       restrictions: {
@@ -82,39 +85,37 @@ export function GooeyFileInput({
         } else {
           filename = url;
         }
-        const fileId = uppy.addFile({
+        const fileId = _uppy.addFile({
           name: filename,
           type: mime.lookup(filename) || undefined,
           data: new Blob(),
         });
-        uppy.setFileState(fileId, {
+        _uppy.setFileState(fileId, {
           progress: { uploadComplete: true, uploadStarted: true },
           uploadURL: url,
         });
       } catch (e) {}
     }
-    if (uppy.getFiles().length) {
-      uppy.setState({
+    if (_uppy.getFiles().length) {
+      _uppy.setState({
         totalProgress: 100,
       });
     }
     // only set this after initial files have been added
-    uppy.setOptions({
+    _uppy.setOptions({
       autoProceed: true,
     });
-    return uppy;
-  });
+    setUppy(_uppy);
+  }, []);
+
+  if (!uppy) return <></>;
+
   return (
     <>
       <label>
         <RenderedMarkdown body={label} />
       </label>
-      <input
-        ref={inputRef}
-        type="hidden"
-        name={name}
-        defaultValue={JSON.stringify(defaultValue)}
-      />
+      <input hidden ref={inputRef} name={name} />
       <Dashboard
         height={300}
         showRemoveButtonAfterComplete

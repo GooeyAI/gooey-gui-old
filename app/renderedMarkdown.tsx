@@ -19,11 +19,5 @@ export function RenderedMarkdown({
   // if (!allowUnsafeHTML) {
   //   html = sanitizeHtml(html);
   // }
-  return (
-    <span
-      className="htmlContainer mdContainer"
-      dangerouslySetInnerHTML={{ __html: html }}
-      {...props}
-    ></span>
-  );
+  return <span dangerouslySetInnerHTML={{ __html: html }} {...props} />;
 }
