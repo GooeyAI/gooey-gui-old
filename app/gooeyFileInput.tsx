@@ -117,7 +117,12 @@ export function GooeyFileInput({
           <RenderedMarkdown body={label} />
         </label>
       ) : null}
-      <input hidden ref={inputRef} name={name} />
+      <input
+        hidden
+        ref={inputRef}
+        name={name}
+        defaultValue={JSON.stringify(defaultValue)}
+      />
       <Dashboard
         height={300}
         showRemoveButtonAfterComplete
