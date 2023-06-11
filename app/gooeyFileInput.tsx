@@ -111,10 +111,12 @@ export function GooeyFileInput({
   if (!uppy) return <></>;
 
   return (
-    <>
-      <label>
-        <RenderedMarkdown body={label} />
-      </label>
+    <div className="gui-input">
+      {label ? (
+        <label>
+          <RenderedMarkdown body={label} />
+        </label>
+      ) : null}
       <input hidden ref={inputRef} name={name} />
       <Dashboard
         height={300}
@@ -126,7 +128,7 @@ export function GooeyFileInput({
         // @ts-ignore
         doneButtonHandler={null}
       />
-    </>
+    </div>
   );
 }
 

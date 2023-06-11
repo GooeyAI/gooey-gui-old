@@ -158,11 +158,6 @@ button .gui-html-container,
   border-radius: 0;
 }
 
-.uppy-Container {
-  margin-top: -1.8rem; /* uppy seems to have an inbuilt margin */
-  margin-bottom: 1rem;
-}
-
 [data-reach-tab-list] {
   margin: 1rem 0;
 }
