@@ -416,6 +416,9 @@ textarea {
   background-color: #fff;
   border: 1px solid #000;
 }
+textarea:disabled {
+  background-color:rgba(0, 0, 0, 0.05)
+}
 
 .tab-pane {
   padding: 2rem 0;
