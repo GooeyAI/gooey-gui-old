@@ -562,7 +562,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 
 code {
   font-size: 14px;
-  color: #000000;
+  color: inherit;
   word-wrap: break-word;
 }
 

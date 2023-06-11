@@ -1,17 +1,17 @@
-import type {LinksFunction} from "@remix-run/node";
-import type {ReactNode} from "react";
-import React, {useEffect} from "react";
-import {Tab, TabList, TabPanel, Tabs} from "react-tabs";
+import type { LinksFunction } from "@remix-run/node";
+import type { ReactNode } from "react";
+import React, { useEffect } from "react";
 import Select from "react-select";
-import {GooeyFileInput, links as fileInputLinks} from "~/gooeyFileInput";
-import {RenderedMarkdown} from "~/renderedMarkdown";
+import { GooeyFileInput, links as fileInputLinks } from "~/gooeyFileInput";
+import { RenderedMarkdown } from "~/renderedMarkdown";
 
-import reactTabsStyle from "react-tabs/style/react-tabs.css";
-import {useJsonFormInput} from "~/jsonFormInput";
-import {JsonViewer} from "@textea/json-viewer";
+import { useJsonFormInput } from "~/jsonFormInput";
+import { JsonViewer } from "@textea/json-viewer";
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from "@reach/tabs";
+import reachStyles from "@reach/tabs/styles.css";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: reactTabsStyle }, ...fileInputLinks()];
+  return [...fileInputLinks()];
 };
 
 type TreeNode = {
@@ -141,7 +141,7 @@ function RenderedTreeNode({
       return (
         <Tabs {...props}>
           <TabList>{tabs}</TabList>
-          {panels}
+          <TabPanels>{panels}</TabPanels>
         </Tabs>
       );
     case "expander": {
@@ -189,7 +189,13 @@ function RenderedTreeNode({
     }
     case "html": {
       const { body, ...args } = props;
-      return <span dangerouslySetInnerHTML={{ __html: body }} {...args} />;
+      return (
+        <span
+          dangerouslySetInnerHTML={{ __html: body }}
+          className="gui-html-container"
+          {...args}
+        />
+      );
     }
     case "markdown": {
       const { body, ...args } = props;

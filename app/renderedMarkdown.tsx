@@ -19,5 +19,11 @@ export function RenderedMarkdown({
   // if (!allowUnsafeHTML) {
   //   html = sanitizeHtml(html);
   // }
-  return <span dangerouslySetInnerHTML={{ __html: html }} {...props} />;
+  return (
+    <span
+      dangerouslySetInnerHTML={{ __html: html }}
+      className="gui-html-container gui-md-container"
+      {...props}
+    />
+  );
 }
