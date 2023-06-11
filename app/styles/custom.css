@@ -387,7 +387,7 @@ h6 {
 .nav-tabs .nav-link {
   margin-bottom: 0px;
   padding: 10px 0px;
-  margin-right: 40px;
+  margin-right: 20px;
   background: 0 0;
   border: 0px;
   border-bottom: 0px solid #dee2e6;
@@ -419,6 +419,24 @@ textarea {
 textarea:disabled {
   background-color:rgba(0, 0, 0, 0.05)
 }
+
+.textarea-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 20px;
+}
+
+.textarea-wrapper textarea {
+    width: 200px;
+    height: 100px;
+}
+
+.textarea-wrapper button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
 
 .tab-pane {
   padding: 2rem 0;
