@@ -584,38 +584,41 @@ a.text-primary:hover {
   text-decoration-thickness: 2px;
 }
 
+/*
 .container {
-  max-width: 100%;
+   max-width: 100%;
 }
 
 .container {
-  width: 100%;
 
-  /*
+
+
+  width: 100%;
   padding-left: 2rem;
   padding-right: 2rem;
 
-   */
+
 }
 
 @media (min-width: 1024px) {
   .container {
-    /*
+
     padding-left: 3.5rem;
     padding-right: 3.5rem;
 
-     */
+
   }
 }
 
 @media (min-width: 1280px) {
   .container {
-    width: 100%;
-    /*
+
+
+     width: 100%;
     padding-left: 6rem;
     padding-right: 6rem;
 
-     */
+
   }
 }
 
@@ -629,6 +632,8 @@ a.text-primary:hover {
     max-width: 100%;
   }
 }
+
+ */
 
 .block-ellipsis {
   display: block;
