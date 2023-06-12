@@ -598,23 +598,31 @@ a.text-primary:hover {
 .container {
   width: 100%;
 
+  /*
   padding-left: 2rem;
   padding-right: 2rem;
+
+   */
 }
 
 @media (min-width: 1024px) {
   .container {
+    /*
     padding-left: 3.5rem;
     padding-right: 3.5rem;
+
+     */
   }
 }
 
 @media (min-width: 1280px) {
   .container {
     width: 100%;
-
+    /*
     padding-left: 6rem;
     padding-right: 6rem;
+
+     */
   }
 }
 
