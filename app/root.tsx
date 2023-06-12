@@ -26,7 +26,9 @@ export const links: LinksFunction = () => [
 export default function App() {
   // let everyone know when the page is done hydrating
   useEffect(() => {
+    // @ts-ignore
     if (typeof window === "undefined" || window.hydrated) return;
+    // @ts-ignore
     window.hydrated = true;
     window.dispatchEvent(new Event("hydrated"));
   }, []);

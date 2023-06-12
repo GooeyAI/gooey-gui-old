@@ -43,6 +43,12 @@ export const links: LinksFunction = () => {
         "sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65",
       crossOrigin: "anonymous",
     },
+    {
+      rel: "stylesheet",
+      href: "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css",
+      crossOrigin: "anonymous",
+      referrerPolicy: "no-referrer",
+    },
     ...baseLinks(),
     { rel: "stylesheet", href: customStyles },
     { rel: "stylesheet", href: appStyles },
@@ -191,6 +197,23 @@ export default function App() {
           value={JSON.stringify({ state, transforms })}
         />
       </Form>
+      <script
+        async
+        defer
+        data-manual
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"
+        integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q=="
+        crossOrigin="anonymous"
+        referrerPolicy="no-referrer"
+      ></script>
+      <script
+        async
+        defer
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw=="
+        crossOrigin="anonymous"
+        referrerPolicy="no-referrer"
+      ></script>
     </>
   );
 }

@@ -8,7 +8,6 @@ import { RenderedMarkdown } from "~/renderedMarkdown";
 import { useJsonFormInput } from "~/jsonFormInput";
 import { JsonViewer } from "@textea/json-viewer";
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from "@reach/tabs";
-import reachStyles from "@reach/tabs/styles.css";
 
 export const links: LinksFunction = () => {
   return [...fileInputLinks()];
