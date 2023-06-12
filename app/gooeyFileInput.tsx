@@ -129,11 +129,13 @@ export function GooeyFileInput({
         defaultValue={JSON.stringify(defaultValue)}
       />
       <Dashboard
-        height={350}
         showRemoveButtonAfterComplete
         showLinkToFileUploadResult
         hideUploadButton
         uppy={uppy}
+        height={250}
+        width={550}
+        singleFileFullScreen={false}
         plugins={["Webcam", "Audio"]}
         // @ts-ignore
         doneButtonHandler={null}
