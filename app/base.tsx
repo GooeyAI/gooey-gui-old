@@ -8,7 +8,6 @@ import { RenderedMarkdown } from "~/renderedMarkdown";
 import { useJsonFormInput } from "~/jsonFormInput";
 import { JsonViewer } from "@textea/json-viewer";
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from "@reach/tabs";
-import reachStyles from "@reach/tabs/styles.css";
 
 export const links: LinksFunction = () => {
   return [...fileInputLinks()];
@@ -217,17 +216,15 @@ function RenderedTreeNode({
       const id = inputId(props);
       switch (props.type) {
         case "file": {
-          const { name, multiple, label, accept, defaultValue, ...args } =
-            props;
           return (
             <GooeyFileInput
-              name={name}
-              multiple={multiple}
-              label={label}
-              accept={accept}
-              onChange={onChange}
-              defaultValue={defaultValue}
-              {...args}
+              name={props.name}
+              label={props.label}
+              accept={props.accept}
+              multiple={props.multiple}
+              onChange={props.onChange}
+              defaultValue={props.defaultValue}
+              uploadMeta={props.uploadMeta}
             />
           );
         }

@@ -417,26 +417,25 @@ textarea {
   border: 1px solid #000;
 }
 textarea:disabled {
-  background-color:rgba(0, 0, 0, 0.05)
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .textarea-wrapper {
-    position: relative;
-    display: inline-block;
-    margin: 20px;
+  position: relative;
+  display: inline-block;
+  margin: 20px;
 }
 
 .textarea-wrapper textarea {
-    width: 200px;
-    height: 100px;
+  width: 200px;
+  height: 100px;
 }
 
 .textarea-wrapper button {
-    position: absolute;
-    top: 5px;
-    right: 5px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
-
 
 .tab-pane {
   padding: 2rem 0;
@@ -558,12 +557,6 @@ input[type="range"]::-webkit-slider-runnable-track {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   letter-spacing: 1px;
-}
-
-code {
-  font-size: 14px;
-  color: inherit;
-  word-wrap: break-word;
 }
 
 .w-3 {

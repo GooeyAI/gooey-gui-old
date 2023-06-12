@@ -1,32 +1,25 @@
 import {
-  isRouteErrorResponse,
   Links,
   LiveReload,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useRouteError,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node"; // Depends on the runtime you choose
 import { cssBundleHref } from "@remix-run/css-bundle";
 import React, { useEffect } from "react";
 
-import { ActionArgs, redirect } from "@remix-run/node";
-
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
-  // { rel: "stylesheet", href: styles },
-  // {
-  //   rel: "stylesheet",
-  //   href: "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css",
-  // },
 ];
 
 export default function App() {
   // let everyone know when the page is done hydrating
   useEffect(() => {
+    // @ts-ignore
     if (typeof window === "undefined" || window.hydrated) return;
+    // @ts-ignore
     window.hydrated = true;
     window.dispatchEvent(new Event("hydrated"));
   }, []);
@@ -41,13 +34,9 @@ export default function App() {
       </head>
       <body>
         <Outlet />
-        {/*<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>*/}
-        {/*<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>*/}
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
-        {/*<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>*/}
-        {/*<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>*/}
       </body>
     </html>
   );
