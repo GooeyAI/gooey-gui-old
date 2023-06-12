@@ -7,6 +7,7 @@ const proxyUrls = [
   "/payment-success/",
   "/favicon",
   "/favicon.ico",
+  "/sitemap.xml/",
   "/__/*",
 ];
 
