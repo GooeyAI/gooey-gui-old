@@ -29,6 +29,7 @@ export function GooeyFileInput({
   multiple,
   onChange,
   defaultValue,
+  uploadMeta,
 }: {
   name: string;
   label: string;
@@ -36,6 +37,7 @@ export function GooeyFileInput({
   multiple: boolean;
   onChange: () => void;
   defaultValue: string | string[] | undefined;
+  uploadMeta: Record<string, string>;
 }) {
   const [uppy, setUppy] = useState<Uppy | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -66,10 +68,11 @@ export function GooeyFileInput({
           complete: "Uploaded",
         },
       },
+      meta: uploadMeta,
     })
       .use(Webcam)
       .use(Audio)
-      .use(XHR, { endpoint: "/fileUpload" })
+      .use(XHR, { endpoint: "/__/file-upload/" })
       .on("upload-success", onFilesChanged)
       .on("file-removed", onFilesChanged);
     let urls = defaultValue;
@@ -85,10 +88,12 @@ export function GooeyFileInput({
         } else {
           filename = url;
         }
+        const contentType = mime.lookup(filename) || undefined;
         const fileId = _uppy.addFile({
           name: filename,
-          type: mime.lookup(filename) || undefined,
+          type: contentType,
           data: new Blob(),
+          preview: contentType?.startsWith("image/") ? url : undefined,
         });
         _uppy.setFileState(fileId, {
           progress: { uploadComplete: true, uploadStarted: true },
@@ -124,7 +129,7 @@ export function GooeyFileInput({
         defaultValue={JSON.stringify(defaultValue)}
       />
       <Dashboard
-        height={300}
+        height={350}
         showRemoveButtonAfterComplete
         showLinkToFileUploadResult
         hideUploadButton

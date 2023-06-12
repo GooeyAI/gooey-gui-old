@@ -24,7 +24,13 @@ module.exports = {
     v2_normalizeFormMethod: true,
     v2_routeConvention: true,
   },
-  serverDependenciesToBundle: "all",
+  serverDependenciesToBundle: [
+    /uppy/,
+    /marked/,
+    /nanoid/,
+    /exifr/,
+    /firebase-admin/,
+  ],
   routes(defineRoutes) {
     return defineRoutes((route) => {
       // A common use for this is catchall _routes.

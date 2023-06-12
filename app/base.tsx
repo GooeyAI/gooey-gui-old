@@ -216,17 +216,15 @@ function RenderedTreeNode({
       const id = inputId(props);
       switch (props.type) {
         case "file": {
-          const { name, multiple, label, accept, defaultValue, ...args } =
-            props;
           return (
             <GooeyFileInput
-              name={name}
-              multiple={multiple}
-              label={label}
-              accept={accept}
-              onChange={onChange}
-              defaultValue={defaultValue}
-              {...args}
+              name={props.name}
+              label={props.label}
+              accept={props.accept}
+              multiple={props.multiple}
+              onChange={props.onChange}
+              defaultValue={props.defaultValue}
+              uploadMeta={props.uploadMeta}
             />
           );
         }
