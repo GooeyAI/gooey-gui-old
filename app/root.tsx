@@ -10,7 +10,7 @@ import {
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node"; // Depends on the runtime you choose
 import { cssBundleHref } from "@remix-run/css-bundle";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { ActionArgs, redirect } from "@remix-run/node";
 
@@ -24,6 +24,13 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
+  // let everyone know when the page is done hydrating
+  useEffect(() => {
+    if (typeof window === "undefined" || window.hydrated) return;
+    window.hydrated = true;
+    window.dispatchEvent(new Event("hydrated"));
+  }, []);
+
   return (
     <html lang="en">
       <head>
