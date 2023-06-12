@@ -19,6 +19,7 @@
 
 .gooey-output-text {
   overflow-y: scroll;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .gooey-output-text p {
