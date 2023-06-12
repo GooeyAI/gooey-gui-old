@@ -39,20 +39,38 @@ code[class*="language-"] {
   color: inherit;
   white-space: pre-wrap;
   word-wrap: break-word;
-  /*max-width: 100%;*/
   /*margin: inherit;*/
   /*padding: inherit;*/
 }
 
 pre,
 pre[class*="language-"] {
-  max-width: 100%;
+  /*max-width: fit-content;*/
   max-height: 20rem;
   overflow: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
   padding: 0.8rem;
   margin: 0 0 0.9rem;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: black;
+  backdrop-filter: blur(3px);
+  box-shadow: inherit;
+  border-radius: inherit;
+  padding: 0.5rem;
+}
+
+div.code-toolbar > .toolbar {
+  font-size: 1.1rem;
+  top: 0.4rem;
+  right: 0.4rem;
+}
+
+div.code-toolbar {
+  /*max-width: fit-content;*/
 }
 
 .gui-input {
