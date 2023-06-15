@@ -25,8 +25,10 @@ export const RenderedHTML = forwardRef<
       if (!(domNode instanceof Element && domNode.attribs)) return;
 
       if (
-        domNode.name === "code" &&
-        domNode.attribs.class?.includes("language-")
+        domNode.children.length &&
+        domNode.children[0] instanceof Element &&
+        domNode.children[0].name === "code" &&
+        domNode.children[0].attribs.class?.includes("language-")
       ) {
         return (
           <RenderedPrismCode domNode={domNode} options={reactParserOptions} />
@@ -114,15 +116,18 @@ function RenderedPrismCode({
   const body = getTextBody(domNode);
   useEffect(() => {
     // @ts-ignore
-    if (!ref.current || !ref.current.parentElement || !window.Prism) return;
+    if (!ref.current || !window.Prism) return;
     // @ts-ignore
-    window.Prism.highlightAllUnder(ref.current.parentElement);
+    window.Prism.highlightElement(ref.current);
   }, [body]);
   // @ts-ignore
-  return React.createElement(
-    domNode.name,
-    { ...attributesToProps(domNode.attribs), ref },
-    domToReact(domNode.children, options)
+  domNode.children[0].attribs.ref = ref;
+  return (
+    <span className="gui-html-container">
+      <pre {...attributesToProps(domNode.attribs)}>
+        {domToReact(domNode.children, options)}
+      </pre>
+    </span>
   );
 }
 
