@@ -7,7 +7,9 @@ import { RenderedMarkdown } from "~/renderedMarkdown";
 
 import { useJsonFormInput } from "~/jsonFormInput";
 import { JsonViewer } from "@textea/json-viewer";
-import { Tabs, TabList, Tab, TabPanels, TabPanel } from "@reach/tabs";
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@reach/tabs";
+import { Link } from "@remix-run/react";
+import { RenderedHTML } from "~/renderedHTML";
 
 export const links: LinksFunction = () => {
   return [...fileInputLinks()];
@@ -71,6 +73,7 @@ function RenderedTreeNode({
   onChange: () => void;
 }) {
   const { name, props, children } = node;
+
   switch (name) {
     case "":
       return <RenderedChildren children={children} onChange={onChange} />;
@@ -84,17 +87,23 @@ function RenderedTreeNode({
       );
     case "nav-tabs":
       return (
-        <ul className="nav nav-tabs" role="tablist" {...props}>
+        <ul
+          className="nav justify-content-md-start justify-content-evenly nav-tabs"
+          role="tablist"
+          {...props}
+        >
           <RenderedChildren children={children} onChange={onChange} />
         </ul>
       );
     case "nav-item": {
       const { to, active, ...args } = props;
       return (
-        <a href={to} {...args}>
+        <Link to={to} {...args}>
           <li className="nav-item" role="presentation">
             <button
-              className={`nav-link ${active ? "active" : ""}`}
+              className={`nav-link  p-2 px-md-3 py-md-2  mx-0 mx-md-2 ${
+                active ? "active" : ""
+              }`}
               type="button"
               role="tab"
               aria-controls="run"
@@ -105,7 +114,7 @@ function RenderedTreeNode({
               </p>
             </button>
           </li>
-        </a>
+        </Link>
       );
     }
     case "pre": {
@@ -188,13 +197,7 @@ function RenderedTreeNode({
     }
     case "html": {
       const { body, ...args } = props;
-      return (
-        <span
-          dangerouslySetInnerHTML={{ __html: body }}
-          className="gui-html-container"
-          {...args}
-        />
-      );
+      return <RenderedHTML body={body} {...args} />;
     }
     case "markdown": {
       const { body, ...args } = props;
@@ -316,9 +319,9 @@ function RenderedTreeNode({
       );
     case "Link":
       return (
-        <a href={props.to} {...props}>
+        <Link to={props.to} {...props}>
           <RenderedChildren children={children} onChange={onChange} />
-        </a>
+        </Link>
       );
     case "tag": {
       const { __reactjsxelement, ...args } = props;

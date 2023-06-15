@@ -8,21 +8,17 @@ import {
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node"; // Depends on the runtime you choose
 import { cssBundleHref } from "@remix-run/css-bundle";
-import React, { useEffect } from "react";
+import React from "react";
+import { globalProgressStyles, useGlobalProgress } from "~/global-progres-bar";
+import { HydrationUtils } from "~/useHydrated";
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
+  ...globalProgressStyles(),
 ];
 
 export default function App() {
-  // let everyone know when the page is done hydrating
-  useEffect(() => {
-    // @ts-ignore
-    if (typeof window === "undefined" || window.hydrated) return;
-    // @ts-ignore
-    window.hydrated = true;
-    window.dispatchEvent(new Event("hydrated"));
-  }, []);
+  useGlobalProgress();
 
   return (
     <html lang="en">
@@ -33,6 +29,7 @@ export default function App() {
         <Links />
       </head>
       <body>
+        <HydrationUtils />
         <Outlet />
         <ScrollRestoration />
         <Scripts />

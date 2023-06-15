@@ -1,13 +1,14 @@
 import React, { useEffect, useRef } from "react";
 import { marked } from "marked";
+import { RenderedHTML } from "~/renderedHTML";
 
 export function RenderedMarkdown({
   body,
-  ...props
+  ...attrs
 }: // allowUnsafeHTML,
 {
   body: string;
-  props?: Record<string, any>[];
+  [attr: string]: any;
   // allowUnsafeHTML?: boolean;
 }) {
   const ref = useRef<HTMLElement>(null);
@@ -23,15 +24,12 @@ export function RenderedMarkdown({
     headerIds: false,
     mangle: false,
   });
-  // if (!allowUnsafeHTML) {
-  //   html = sanitizeHtml(html);
-  // }
   return (
-    <span
+    <RenderedHTML
       ref={ref}
-      dangerouslySetInnerHTML={{ __html: html }}
+      body={html}
       className="gui-html-container gui-md-container"
-      {...props}
+      {...attrs}
     />
   );
 }

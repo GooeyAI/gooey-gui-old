@@ -1,4 +1,13 @@
-const wixUrls = ["/", "/faq", "/pricing", "/privacy", "/terms", "/team/"];
+const wixUrls = [
+  "/",
+  "/faq",
+  "/pricing",
+  "/privacy",
+  "/terms",
+  "/team/",
+  "/jobs/",
+];
+
 const proxyUrls = [
   "/static/*",
   "/login/",

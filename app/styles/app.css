@@ -1,3 +1,8 @@
+html {
+  /* fix for jumping scrollbar issue - https://css-tricks.com/elegant-fix-jumping-scrollbar-issue/ */
+  margin-left: calc(100vw - 100%);
+}
+
 .gui-img {
   width: 100%;
   max-width: 300px;
@@ -231,4 +236,23 @@ button .gui-html-container,
 
 .uppy-Dashboard-Item-progressIcon--circle {
   display: none;
+}
+
+#nprogress .bar {
+  background: #02b3a1;
+  height: 4px;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #02b3a1, 0 0 5px #02b3a1;
+  width: 100%;
+  transform: none;
+}
+
+#nprogress .spinner-icon {
+  border: solid 3px transparent;
+  border-top-color: #02b3a1;
+  border-left-color: #02b3a1;
+  width: 25px;
+  height: 25px;
 }

@@ -29,6 +29,7 @@ import { useDebouncedCallback } from "use-debounce";
 
 import customStyles from "~/styles/custom.css";
 import appStyles from "~/styles/app.css";
+import { Interweave } from "interweave";
 
 export const meta: V2_MetaFunction = ({ data }) => {
   return data.meta ?? [];
@@ -134,6 +135,10 @@ export const shouldRevalidate: ShouldRevalidateFunction = (args) => {
   ) {
     return false;
   }
+  if (typeof window !== "undefined") {
+    // @ts-ignore
+    window.hydrated = false;
+  }
   return args.defaultShouldRevalidate;
 };
 
@@ -211,7 +216,7 @@ export default function App() {
         integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q=="
         crossOrigin="anonymous"
         referrerPolicy="no-referrer"
-      ></script>
+      />
       <script
         async
         defer
@@ -219,7 +224,7 @@ export default function App() {
         integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw=="
         crossOrigin="anonymous"
         referrerPolicy="no-referrer"
-      ></script>
+      />
       <script
         async
         defer
@@ -227,7 +232,7 @@ export default function App() {
         integrity="sha512-st608h+ZqzliahyzEpETxzU0f7z7a9acN6AFvYmHvpFhmcFuKT8a22TT5TpKpjDa3pt3Wv7Z3SdQBCBdDPhyWA=="
         crossOrigin="anonymous"
         referrerPolicy="no-referrer"
-      ></script>
+      />
       <script
         async
         defer
@@ -235,7 +240,7 @@ export default function App() {
         integrity="sha512-/kVH1uXuObC0iYgxxCKY41JdWOkKOxorFVmip+YVifKsJ4Au/87EisD1wty7vxN2kAhnWh6Yc8o/dSAXj6Oz7A=="
         crossOrigin="anonymous"
         referrerPolicy="no-referrer"
-      ></script>
+      />
     </div>
   );
 }

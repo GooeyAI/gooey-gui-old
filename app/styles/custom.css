@@ -190,8 +190,8 @@ h6 {
 }
 
 .nav-link {
-  display: block;
-  padding: 12px !important;
+  /*display: block;*/
+  /*padding: 12px !important;*/
   color: #00000073;
   text-decoration: none;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
@@ -213,13 +213,6 @@ h6 {
 
 .logo {
   width: 145px;
-}
-
-@media (min-width: 992px) {
-  .navbar-expand-xl .navbar-nav .nav-link {
-    padding-right: 2rem;
-    padding-left: 2rem;
-  }
 }
 
 #navbar-hamburger.show {
@@ -385,14 +378,11 @@ h6 {
 }
 
 .nav-tabs .nav-link {
-  margin-bottom: 0px;
-  padding: 10px 0px;
-  margin-right: 20px;
   background: 0 0;
-  border: 0px;
-  border-bottom: 0px solid #dee2e6;
-  border-top-left-radius: 0rem;
-  border-top-right-radius: 0rem;
+  border: 0;
+  border-bottom: 0 solid #dee2e6;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .nav-tabs .nav-link:hover {
@@ -406,8 +396,8 @@ h6 {
 
 .nav-tabs .nav-link {
   /* border-bottom: 2px solid #dee2e6; */
-  font-size: 16px;
-  padding: 20px;
+  /*font-size: 16px;*/
+  /*padding: 20px;*/
 }
 
 textarea {
