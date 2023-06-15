@@ -24,6 +24,15 @@ export const RenderedHTML = forwardRef<
     replace: function (domNode) {
       if (!(domNode instanceof Element && domNode.attribs)) return;
 
+      if (
+        domNode.name === "code" &&
+        domNode.attribs.class?.includes("language-")
+      ) {
+        return (
+          <RenderedPrismCode domNode={domNode} options={reactParserOptions} />
+        );
+      }
+
       if (typeof domNode.attribs["data-internal-link"] !== "undefined") {
         const href = domNode.attribs.href;
         delete domNode.attribs.href;
@@ -45,11 +54,7 @@ export const RenderedHTML = forwardRef<
       }
 
       if (domNode.type === "script") {
-        let body = "";
-        const child = domNode.children[0];
-        if (child instanceof Text) {
-          body = child.data;
-        }
+        let body = getTextBody(domNode);
         return <InlineScript attrs={domNode.attribs} body={body} />;
       }
     },
@@ -61,6 +66,7 @@ export const RenderedHTML = forwardRef<
     </span>
   );
 });
+
 function InlineScript({
   attrs,
   body,
@@ -96,4 +102,35 @@ function InlineScript({
       />
     );
   }
+}
+function RenderedPrismCode({
+  domNode,
+  options,
+}: {
+  domNode: Element;
+  options: HTMLReactParserOptions;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const body = getTextBody(domNode);
+  useEffect(() => {
+    // @ts-ignore
+    if (!ref.current || !ref.current.parentElement || !window.Prism) return;
+    // @ts-ignore
+    window.Prism.highlightAllUnder(ref.current.parentElement);
+  }, [body]);
+  // @ts-ignore
+  return React.createElement(
+    domNode.name,
+    { ...attributesToProps(domNode.attribs), ref },
+    domToReact(domNode.children, options)
+  );
+}
+
+function getTextBody(domNode: Element) {
+  let body = "";
+  const child = domNode.children[0];
+  if (child instanceof Text) {
+    body = child.data;
+  }
+  return body;
 }
