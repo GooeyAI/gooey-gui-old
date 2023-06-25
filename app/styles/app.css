@@ -37,6 +37,7 @@ textarea {
   resize: vertical;
   width: 100%;
   overflow: auto;
+  border: 1px solid #c9c9c9;
 }
 
 code,
@@ -255,4 +256,18 @@ button .gui-html-container,
   border-left-color: #02b3a1;
   width: 25px;
   height: 25px;
+}
+
+.gui-input-range input[type="range"] {
+  width: 100%;
+  margin: 0 1rem;
+}
+
+.gui-input-number input {
+  padding: 0.5rem;
+}
+
+.gui-input-range input[type="number"] {
+  width: 7rem;
+  padding: 0.5rem;
 }

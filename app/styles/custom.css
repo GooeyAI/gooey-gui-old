@@ -506,37 +506,6 @@ textarea:disabled {
   background-color: #fff !important;
 }
 
-input[type="range"]::-webkit-slider-thumb {
-  background: #000 !important;
-}
-
-input[type="range"]::-moz-range-thumb {
-  background: #000 !important;
-}
-
-input[type="range"]::-ms-thumb {
-  background: #000 !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-transition: none;
-    transition: none;
-  }
-}
-
-input[type="range"]::-webkit-slider-thumb:active {
-  background-color: #f2f2f2;
-}
-
-input[type="range"]::-webkit-slider-runnable-track {
-  color: transparent;
-  cursor: pointer;
-  background-color: #f2f2f2;
-  border-color: transparent;
-  border-radius: 1rem;
-}
-
 .cust-input-label {
   background-color: rgba(0, 0, 0, 0.05);
   display: inline-block;

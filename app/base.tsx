@@ -1,6 +1,6 @@
 import type { LinksFunction } from "@remix-run/node";
 import type { ReactNode } from "react";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Select from "react-select";
 import { GooeyFileInput, links as fileInputLinks } from "~/gooeyFileInput";
 import { RenderedMarkdown } from "~/renderedMarkdown";
@@ -218,6 +218,9 @@ function RenderedTreeNode({
       const className = `gui-input gui-input-${props.type}`;
       const id = inputId(props);
       switch (props.type) {
+        case "range": {
+          return <GooeySlider className={className} id={id} props={props} />;
+        }
         case "file": {
           return (
             <GooeyFileInput
@@ -405,6 +408,45 @@ function GuiSelect({
       <JsonFormInput />
       {/*{JsonFormInput}*/}
       <Select value={selectValue} onChange={onSelectChange} {...args} />
+    </div>
+  );
+}
+
+function GooeySlider({
+  className,
+  id,
+  props,
+}: {
+  className: string;
+  id: string;
+  props: Record<string, any>;
+}) {
+  const { label, ...args } = props;
+  const ref1 = useRef<HTMLInputElement>(null);
+  const ref2 = useRef<HTMLInputElement>(null);
+  return (
+    <div className={className}>
+      <label htmlFor={id}>
+        <RenderedMarkdown className="flex-grow-1" body={label} />
+      </label>
+      <div className="d-flex justify-content-between align-items-center">
+        <input
+          ref={ref1}
+          onChange={(e) => {
+            if (ref2.current) ref2.current.value = e.target.value;
+          }}
+          {...args}
+          type="number"
+        />
+        <input
+          ref={ref2}
+          onChange={(e) => {
+            if (ref1.current) ref1.current.value = e.target.value;
+          }}
+          id={id}
+          {...args}
+        />
+      </div>
     </div>
   );
 }
