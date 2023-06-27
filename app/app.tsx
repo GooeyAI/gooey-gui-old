@@ -174,8 +174,8 @@ export default function App() {
     let target = event.target;
     // debounce based on input type - generally text inputs are slow, everything else is fast
     if (
-      target instanceof HTMLInputElement &&
-      ["text", "textarea"].includes(target.type)
+      (target instanceof HTMLInputElement && target.type === "text") ||
+      target instanceof HTMLTextAreaElement
     ) {
       debouncedSubmit(event.currentTarget);
     } else {
