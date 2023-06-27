@@ -29,7 +29,6 @@ import { useDebouncedCallback } from "use-debounce";
 
 import customStyles from "~/styles/custom.css";
 import appStyles from "~/styles/app.css";
-import { Interweave } from "interweave";
 
 export const meta: V2_MetaFunction = ({ data }) => {
   return data.meta ?? [];
