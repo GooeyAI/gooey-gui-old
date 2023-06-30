@@ -47,6 +47,7 @@ input[type="number"] {
   padding: 0.5rem;
   width: 7rem;
   border: 1px solid #c9c9c9;
+  display: block;
 }
 
 code,
@@ -186,10 +187,11 @@ button .gui-html-container,
   background: transparent;
   color: white;
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: gray;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 0;
 }
 
