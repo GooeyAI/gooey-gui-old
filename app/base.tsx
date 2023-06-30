@@ -264,9 +264,13 @@ function RenderedTreeNode({
       }
     }
     case "gui-button": {
-      const { label, ...args } = props;
+      const { label, className, ...args } = props;
       return (
-        <button type="button" className={"btn btn-theme"} {...args}>
+        <button
+          type="button"
+          className={`btn btn-theme ${className ?? ""}`}
+          {...args}
+        >
           <RenderedMarkdown body={label} />
         </button>
       );
