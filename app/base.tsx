@@ -119,7 +119,11 @@ function RenderedTreeNode({
     }
     case "pre": {
       const { body, ...args } = props;
-      return <pre {...args}>{body}</pre>;
+      return (
+        <pre className="gooey-output-text" {...args}>
+          {body}
+        </pre>
+      );
     }
     case "ul": {
       return (
@@ -238,7 +242,7 @@ function RenderedTreeNode({
         case "radio": {
           const { label, ...args } = props;
           return (
-            <div className={className}>
+            <div className={className + " "}>
               <input id={id} {...args} />
               <label htmlFor={id}>
                 <RenderedMarkdown body={label} />

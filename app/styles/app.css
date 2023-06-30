@@ -24,7 +24,11 @@ html {
 
 .gooey-output-text {
   overflow-y: scroll;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #0000000d;
+  color: rgb(84, 84, 84);
+  border: 1px solid #c9c9c9;
+  padding: 5px 0.9rem;
+  margin-bottom: 0.9rem;
 }
 
 .gooey-output-text p {
@@ -32,11 +36,16 @@ html {
 }
 
 input[type="text"],
-input[type="number"],
 textarea {
   resize: vertical;
   width: 100%;
   overflow: auto;
+  border: 1px solid #c9c9c9;
+}
+
+input[type="number"] {
+  padding: 0.5rem;
+  width: 7rem;
   border: 1px solid #c9c9c9;
 }
 
@@ -173,13 +182,6 @@ button .gui-html-container,
   white-space: nowrap;
 }
 
-.gooey-output-text {
-  border: 1px solid black;
-  overflow-y: scroll;
-  padding: 5px 0.9rem;
-  margin-bottom: 0.9rem;
-}
-
 ::-webkit-scrollbar {
   background: transparent;
   color: white;
@@ -264,10 +266,5 @@ button .gui-html-container,
 }
 
 .gui-input-number input {
-  padding: 0.5rem;
-}
-
-.gui-input-range input[type="number"] {
-  width: 7rem;
   padding: 0.5rem;
 }

@@ -4,7 +4,7 @@
 ```bash
 nvm install 18.12.0
 ```
-2. Install redis (if you don't already) using [brew](https://redis.io/docs/getting-started/installation/install-redis-on-mac-os/)
+2. Install & start redis - https://redis.io/docs/getting-started/installation/install-redis-on-mac-os/
 ```bash
 brew install redis
 brew services start redis
@@ -20,7 +20,7 @@ cp .env.example .env
 ```
 6. Either start the [python server](https://github.com/dara-network/ddgai/) on `localhost:8080`, or if you're lazy, use the test server in `.env` -
 ```bash
-SERVER_HOST=http://gooey-test.us-1.gooey.ai
+SERVER_HOST=http://gooey-api-test.us-1.gooey.ai
 ```
 7. Start remix server
 ```bash
