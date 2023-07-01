@@ -8,6 +8,8 @@ html {
   max-width: 300px;
   height: auto;
   margin-bottom: 0.9rem;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .gui-video {
