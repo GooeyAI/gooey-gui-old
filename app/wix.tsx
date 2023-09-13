@@ -60,7 +60,10 @@ async function loadPage(url: string, isMobile: boolean): Promise<string> {
 
 async function _loadPage(url: string, isMobile: boolean): Promise<string> {
   if (!global.browser) {
-    global.browser = await puppeteer.launch({ headless: "new" });
+    global.browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox"],
+    });
   }
   const page = await global.browser.newPage();
   let ua;
