@@ -29,7 +29,9 @@
     "isbot": "^3.6.8",
     "marked": "^5.0.0",
     "mime-types": "^2.1.35",
+    "mobile-detect": "^1.4.5",
     "nprogress": "^0.2.0",
+    "puppeteer": "^21.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-select": "^5.7.3",
@@ -50,6 +52,7 @@
     "@types/react-dom": "^17.0.2",
     "@types/uuid": "^9.0.1",
     "eslint": "^8.38.0",
+    "prettier": "^3.0.3",
     "typescript": "^5.0.4"
   },
   "engines": {

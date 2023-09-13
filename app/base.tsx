@@ -211,7 +211,9 @@ function RenderedTreeNode({
       const { label, ...args } = props;
       return (
         <div className="gui-input gui-input-textarea">
-          <RenderedMarkdown body={label} />
+          <label>
+            <RenderedMarkdown body={label} />
+          </label>
           <div>
             <textarea {...args} />
           </div>
