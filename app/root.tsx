@@ -34,6 +34,7 @@ export default function App() {
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
+        <div id="portal" />
       </body>
     </html>
   );

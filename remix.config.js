@@ -40,6 +40,7 @@ module.exports = {
     /nanoid/,
     /exifr/,
     /firebase-admin/,
+    /glideapps/,
   ],
   routes(defineRoutes) {
     return defineRoutes((route) => {
