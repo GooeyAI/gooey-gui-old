@@ -71,7 +71,7 @@ export function ErrorBoundary() {
     return (
       <div>
         <p>Status: {error.status}</p>
-        <p dangerouslySetInnerHTML={{ __html: JSON.stringify(error.data) }}></p>
+        <pre>{JSON.stringify(error.data)}</pre>
       </div>
     );
   }
