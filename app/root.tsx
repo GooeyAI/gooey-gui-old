@@ -71,7 +71,7 @@ export function ErrorBoundary() {
     return (
       <div>
         <p>Status: {error.status}</p>
-        <p dangerouslySetInnerHTML={{ __html: error.data }}></p>
+        <p dangerouslySetInnerHTML={{ __html: `${error.data}` }}></p>
       </div>
     );
   }
