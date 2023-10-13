@@ -52,10 +52,11 @@ export function DataTable({ fileUrl }: { fileUrl: string }) {
   }, [fileUrl]);
 
   const getContent = useCallback(
-    (cell: Item): GridCell => {
+    (cell: Item) => {
       const [col, row] = cell;
       const dataRow = data[row];
-      let displayData = `${dataRow[columns[col].title] || ""}`;
+      if (dataRow === undefined) return;
+      let displayData = `${dataRow[columns[col].title] ?? ""}`;
       return {
         kind: GridCellKind.Text,
         allowOverlay: true,
