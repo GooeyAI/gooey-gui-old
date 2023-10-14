@@ -30,6 +30,7 @@ import { useDebouncedCallback } from "use-debounce";
 
 import customStyles from "~/styles/custom.css";
 import appStyles from "~/styles/app.css";
+import settings from "~/settings";
 
 export const meta: V2_MetaFunction = ({ data }) => {
   return data.meta ?? [];
@@ -101,7 +102,7 @@ async function callServer({
   request: Request;
 }) {
   const requestUrl = new URL(request.url);
-  const serverUrl = new URL(process.env["SERVER_HOST"]!);
+  const serverUrl = new URL(settings.SERVER_HOST!);
   serverUrl.pathname = path.join(serverUrl.pathname, params["*"] ?? "");
   serverUrl.search = requestUrl.search;
 

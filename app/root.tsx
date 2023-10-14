@@ -15,6 +15,7 @@ import { cssBundleHref } from "@remix-run/css-bundle";
 import React from "react";
 import { globalProgressStyles, useGlobalProgress } from "~/global-progres-bar";
 import { HydrationUtils } from "~/useHydrated";
+import settings from "~/settings";
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
@@ -25,9 +26,9 @@ export const links: LinksFunction = () => [
 export async function loader() {
   return json({
     ENV: {
-      SENTRY_DSN: process.env.SENTRY_DSN,
-      SENTRY_SAMPLE_RATE: process.env.SENTRY_SAMPLE_RATE,
-      SENTRY_RELEASE: process.env.SENTRY_RELEASE,
+      SENTRY_DSN: settings.SENTRY_DSN,
+      SENTRY_SAMPLE_RATE: settings.SENTRY_SAMPLE_RATE,
+      SENTRY_RELEASE: settings.SENTRY_RELEASE,
     },
   });
 }

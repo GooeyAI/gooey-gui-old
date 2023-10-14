@@ -3,6 +3,7 @@ import path from "path";
 import type { Browser } from "puppeteer";
 
 import MobileDetect from "mobile-detect";
+import settings from "~/settings";
 
 const puppeteer = require("puppeteer");
 
@@ -24,7 +25,7 @@ export async function loader({ request }: LoaderArgs) {
     new MobileDetect(request.headers.get("User-Agent") ?? "").mobile(),
   );
 
-  const wixUrl = new URL(process.env["WIX_SITE_URL"]!);
+  const wixUrl = new URL(settings.RENDER_PROXY_HOST!);
   wixUrl.pathname = path.join(wixUrl.pathname, requestUrl.pathname, "/");
   wixUrl.search = requestUrl.search;
   wixUrl.hash = `isMobile=${isMobile}`;

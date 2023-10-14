@@ -1,24 +1,8 @@
-const wixUrls = [
-  "/",
-  "/faq",
-  "/pricing",
-  "/privacy",
-  "/terms",
-  "/team/",
-  "/jobs/",
-];
+require("dotenv/config");
 
-const proxyUrls = [
-  "/static/*",
-  "/login/",
-  "/logout/",
-  "/account/",
-  "/payment-success/",
-  "/favicon",
-  "/favicon.ico",
-  "/sitemap.xml/",
-  "/__/*",
-];
+const PROXY_URLS = process.env.PROXY_URLS?.trim().split(/\s+/) || [];
+const RENDER_PROXY_URLS =
+  process.env.RENDER_PROXY_URLS?.trim().split(/\s+/) || [];
 
 /** @type {import('@remix-run/dev').AppConfig} */
 module.exports = {
@@ -47,13 +31,19 @@ module.exports = {
       // A common use for this is catchall _routes.
       // - The first argument is the React Router path to match against
       // - The second is the relative filename of the route handler
-      for (const path of wixUrls) {
-        route(path, "wix.tsx", { id: path });
-      }
-      for (const path of proxyUrls) {
+      for (const path of PROXY_URLS) {
         route(path, "proxy.tsx", { id: path });
       }
+      route("/__/*", "proxy.tsx", { id: "__hidden" });
+      for (const path of RENDER_PROXY_URLS) {
+        route(path, "renderProxy.tsx", { id: path });
+      }
       route("/__/realtime/*", "realtime.tsx");
+      try {
+        route("/", "app.tsx", { id: "index" });
+      } catch {
+        // ignore if duplicate
+      }
       route("*", "app.tsx");
     });
   },
