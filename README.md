@@ -29,20 +29,20 @@ brew services start redis
 
 1. Clone this repo
 
-```
+```bash
 git clone https://github.com/dara-network/gooey-ui
 ```
 
 2. Install node dependencies
 
-```
+```bash
 cd gooey-ui
 npm install
 ```
 
 3. Install python dependencies
 
-```
+```bash
 cd your-python-project
 pip install gooey-ui
 ```
@@ -67,14 +67,14 @@ Copy that to a file main.py.
 
 Run the python server:
 
-```
-cd your-python-project
+```bash
+cd your-pΩΩython-project
 uvicorn main:app --reload
 ```
 
 Run the Frontend:
 
-```
+```bash
 cd gooey-ui
 npm run dev
 ```
@@ -85,7 +85,7 @@ Open the browser at `localhost:3000` and you should see the following 🎉
 
 ### Adding interactivity
 
-```
+```py
 @gui.route(app, "/temp")
 def root():
     temperature = gui.slider("Temperature", 0, 100, 50)
@@ -100,7 +100,7 @@ GooeyUI is designed to be fast and scalable, hence forces you to do blocking ope
 
 We'll demonstrate this using an example:
 
-```
+```py
 from threading import Thread
 from time import sleep
 
