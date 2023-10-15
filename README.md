@@ -1,6 +1,6 @@
 ## GooeyUI - Write production grade web apps in pure Python
 
-GooeyUI is an alternative to Streamlit, Dash, and other Python UI frameworks. 
+GooeyUI is an alternative to Streamlit, Dash, and other Python UI frameworks. See what it's capable of at [/explore](https://gooey.ai/explore).
 
 The main innovation in this framework is the complete removal of websockets.
 
@@ -122,6 +122,9 @@ def counter(set_count):
         sleep(1)
 ```
 
+<img width="342" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/519816ec-d773-4846-a62b-1a22d06fce74">
+
+
 Let's break this down:
 
 First, we create a state variable called `count` and a setter function called `set_count`.
@@ -184,6 +187,9 @@ def counter(set_count):
         sleep(1)
 ```
 
+<img width="406" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/5a74bfdd-f7f2-4638-ad8f-05d0d40466a8">
+
+
 ### OpenAI Streaming
 
 It's pretty easy to integrate OpenAI's streaming API with GooeyUI. Let's build a poem generator.
@@ -225,6 +231,9 @@ def generate_poem(prompt, set_text):
     set_text(text) # final result
 ```
 
+<img width="856" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/c25bdf87-cab3-4d07-829b-5ddcda06be15">
+
+
 ### File uploads
 
 ```py
@@ -257,3 +266,6 @@ def upload():
     if uploaded_file is not None:
         gui.image(uploaded_file)
 ```
+
+<img width="558" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/fe0d0245-ec82-452b-a14e-566311537414">
+
