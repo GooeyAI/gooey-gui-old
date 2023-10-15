@@ -68,7 +68,7 @@ Copy that to a file main.py.
 Run the python server:
 
 ```bash
-cd your-pΩΩython-project
+cd your-python-project
 uvicorn main:app --reload
 ```
 
