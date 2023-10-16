@@ -95,31 +95,23 @@ def root():
 
 ### Sending realtime updates to frontend
 
-Unlike other frameworks where you do blocking compute in the main loop of your app, 
-GooeyUI is designed to be fast and scalable, hence forces you to do blocking operations inside another thread.
-
-We'll demonstrate this using an example:
+Here's a simple counter that updates every second:
 
 ```py
-from threading import Thread
 from time import sleep
 
 
 @gui.route(app, "/counter")
 def poems():
     count, set_count = gui.use_state(0)
-    
+
     start_counter = gui.button("Start Counter")
     if start_counter:
-        Thread(target=counter, args=[set_count]).start()
+        for i in range(10):
+            set_count(i)
+            sleep(1)
 
     gui.write(f"### Count: {count}")
-        
-
-def counter(set_count):
-    for i in range(10):  
-        set_count(i)
-        sleep(1)
 ```
 
 <img width="342" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/519816ec-d773-4846-a62b-1a22d06fce74">
@@ -140,55 +132,53 @@ Next, we create a button called using `gui.button()` which returns `True` when t
 start_counter = gui.button("Start Counter")
 ```
 
-If the button is clicked, we start a new thread that calls the `counter` function and pass it the `set_count` function.
+If the button is clicked, we start our blocking loop, that updates the count every second.
 
 ```py
 if start_counter:
-    Thread(target=counter, args=[set_count]).start()
-```
-
-The `counter` function is a blocking function that updates the count every second.
-
-```py
-def counter(set_count):
     for i in range(10):  
         set_count(i)
         sleep(1)
+```
+
+Finally, we render the count using `gui.write()`
+
+```py
+gui.write(f"### Count: {count}")
 ```
 
 ### GooeyUI is always interactive
 
-Since we use threads, the UI is never blocked, and you can continue to interact with the UI while the counter is running.
+Unlike other UI frameworks that block the main loop of your app, GooeyUI always keeps your app interactive.
 
-Here, we add a text input and show the value of the text input below it. Try typing something while the counter is running.
+Let's add a text input and show the value of the text input below it. Try typing something while the counter is running.
 
 ```py
-from threading import Thread
 from time import sleep
-
 
 @gui.route(app, "/counter")
 def poems():
     count, set_count = gui.use_state(0)
-    
+
     start_counter = gui.button("Start Counter")
     if start_counter:
-        Thread(target=counter, args=[set_count]).start()
+        for i in range(10):
+            set_count(i)
+            sleep(1)
 
     gui.write(f"### Count: {count}")
-    
-    text = gui.text_input("Type Something here...")
-    gui.write(f"**You typed:** {text}")
-        
 
-def counter(set_count):
-    for i in range(10):  
-        set_count(i)
-        sleep(1)
+    text = gui.text_input("Type Something here...")
+    gui.write("**You typed:** " + text)
 ```
 
 <img width="406" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/5a74bfdd-f7f2-4638-ad8f-05d0d40466a8">
 
+This works because by default fastapi uses a thread pool. 
+So while that counter is running, the other threads are free to handle requests from the frontend.
+
+In production, you can scale horizontally by running multiple instances of your server behind a load balancer, 
+and using a task queue like celery to handle long-running tasks, or using [BackgroundTasks](https://fastapi.tiangolo.com/tutorial/background-tasks/) in FastAPI.
 
 ### OpenAI Streaming
 
@@ -205,7 +195,7 @@ def poems():
 
     if gui.button("Generate 🪄"):
         set_text("Starting...")
-        Thread(target=generate_poem, args=[prompt, set_text]).start()
+        generate_poem(prompt, set_text)
 
     gui.write(text)
 

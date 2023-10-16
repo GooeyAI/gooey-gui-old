@@ -1,5 +1,4 @@
 import os
-from threading import Thread
 
 import openai
 from fastapi import FastAPI
@@ -21,7 +20,7 @@ def poems():
 
     if gui.button("Generate 🪄"):
         set_text("Starting...")
-        Thread(target=generate_poem, args=[prompt, set_text]).start()
+        generate_poem(prompt, set_text)
 
     gui.write(text)
 
