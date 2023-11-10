@@ -172,7 +172,7 @@ def poems():
     gui.write("**You typed:** " + text)
 ```
 
-<img width="406" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/5a74bfdd-f7f2-4638-ad8f-05d0d40466a8">
+<img width="406" alt="image" src="https://github-production-user-asset-6210df.s3.amazonaws.com/19492893/275349796-5a74bfdd-f7f2-4638-ad8f-05d0d40466a8.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231110T185540Z&X-Amz-Expires=300&X-Amz-Signature=a1cf3189e04bc300c191139bc8b09bd10a0a830af3e743d9894f0f0a40717af0&X-Amz-SignedHeaders=host&actor_id=12608604&key_id=0&repo_id=539671263">
 
 This works because by default fastapi uses a thread pool. 
 So while that counter is running, the other threads are free to handle requests from the frontend.
@@ -221,7 +221,7 @@ def generate_poem(prompt, set_text):
     set_text(text) # final result
 ```
 
-<img width="856" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/c25bdf87-cab3-4d07-829b-5ddcda06be15">
+<img width="856" alt="image" src="https://github-production-user-asset-6210df.s3.amazonaws.com/19492893/275349990-c25bdf87-cab3-4d07-829b-5ddcda06be15.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231110T185607Z&X-Amz-Expires=300&X-Amz-Signature=fd738900bbe3584ec40fe04c1782be23f1b8187273570d94a56ed433524e3e68&X-Amz-SignedHeaders=host&actor_id=12608604&key_id=0&repo_id=539671263">
 
 
 ### File uploads
@@ -257,5 +257,5 @@ def upload():
         gui.image(uploaded_file)
 ```
 
-<img width="558" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/fe0d0245-ec82-452b-a14e-566311537414">
+<img width="558" alt="image" src="https://github-production-user-asset-6210df.s3.amazonaws.com/19492893/275350097-fe0d0245-ec82-452b-a14e-566311537414.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231110T185702Z&X-Amz-Expires=300&X-Amz-Signature=1704cb14019d588cd131b5e26863d3a0499cf462b91590c6a6858c94072e21be&X-Amz-SignedHeaders=host&actor_id=12608604&key_id=0&repo_id=539671263">
 
