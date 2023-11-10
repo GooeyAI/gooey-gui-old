@@ -1,6 +1,6 @@
-## GooeyUI - Write production grade web apps in pure Python
+## GooeyGUI - Write production grade web apps in pure Python
 
-GooeyUI is an alternative to Streamlit, Dash, and other Python UI frameworks. See what it's capable of at [/explore](https://gooey.ai/explore).
+GooeyGUI is an alternative to Streamlit, Dash, and other Python UI frameworks. See what it's capable of at [/explore](https://gooey.ai/explore).
 
 The main innovation in this framework is the complete removal of websockets.
 
@@ -30,13 +30,13 @@ brew services start redis
 1. Clone this repo
 
 ```bash
-git clone https://github.com/dara-network/gooey-ui
+git clone https://github.com/GooeyAI/gooey-gui
 ```
 
 2. Install node dependencies
 
 ```bash
-cd gooey-ui
+cd gooey-gui
 npm install
 ```
 
@@ -44,14 +44,14 @@ npm install
 
 ```bash
 cd your-python-project
-pip install gooey-ui
+pip install gooey-gui
 ```
 
 ### Usage
 
 ```python
 from fastapi import FastAPI
-import gooey_ui as gui
+import gooey_gui as gui
 
 app = FastAPI()
 
@@ -75,13 +75,13 @@ uvicorn main:app --reload
 Run the Frontend:
 
 ```bash
-cd gooey-ui
+cd gooey-gui
 npm run dev
 ```
 
 Open the browser at `localhost:3000` and you should see the following 🎉
 
-<img width="341" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/94dba9a2-7f49-44d9-8325-4e9338659b29">
+<img width="341" alt="image" src="https://github-production-user-asset-6210df.s3.amazonaws.com/19492893/275203972-94dba9a2-7f49-44d9-8325-4e9338659b29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231110T182721Z&X-Amz-Expires=300&X-Amz-Signature=92875972a15c90cd68dfdc4963e312a1db643e30cbeceeae74b370943025c5a9&X-Amz-SignedHeaders=host&actor_id=12608604&key_id=0&repo_id=539671263">
 
 ### Adding interactivity
 
@@ -114,7 +114,7 @@ def poems():
     gui.write(f"### Count: {count}")
 ```
 
-<img width="342" alt="image" src="https://github.com/dara-network/gooey-server/assets/19492893/519816ec-d773-4846-a62b-1a22d06fce74">
+<img width="342" alt="image" src="https://github-production-user-asset-6210df.s3.amazonaws.com/19492893/275349761-519816ec-d773-4846-a62b-1a22d06fce74.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231110T182825Z&X-Amz-Expires=300&X-Amz-Signature=be1bd6898b80ca6518af3d668e0ead5cc7953318916bc09c5ce66670383b528e&X-Amz-SignedHeaders=host&actor_id=12608604&key_id=0&repo_id=539671263">
 
 
 Let's break this down:
